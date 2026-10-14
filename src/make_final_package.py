@@ -224,8 +224,8 @@ def checklist() -> str:
 
 
 # --------------------------------------------------------------------------- manifest + release
-EXCLUDE_DIRS = {"__pycache__", ".ipynb_checkpoints", ".pytest_cache", ".git", ".venv", "_smoke"}
-NOT_IN_RELEASE = ("data/raw/uci/", "data/raw/zenodo/", "models/transformers/", "experiments/results/error_analysis.csv", "reports/tables/explain_examples.csv")
+EXCLUDE_DIRS = {"__pycache__", ".ipynb_checkpoints", ".pytest_cache", ".git", ".venv", ".venv311", "backups", "_smoke"}
+NOT_IN_RELEASE = ("data/raw/uci/", "data/raw/zenodo/", "models/transformers/", "experiments/results/error_analysis.csv", "results/error_analysis.csv", "reports/tables/explain_examples.csv", "reports/tables/before_leakage_fix_rebuild/")
 PURPOSES = [("data/raw/uci/", "raw UCI SMS Spam Collection (third-party)"), ("data/raw/zenodo/", "raw Zenodo Roman-Urdu phishing SMS (third-party; license unverified)"),
             ("data/raw/scaffold/", "originally supplied empty scaffold files (audit trail)"), ("data/processed/mars_nlp_processed", "processed corpus (rebuild with `src.build_dataset`)"),
             ("data/processed/", "checksum / split fingerprint guarding the audited split"), ("data/", "data documentation"), ("models/baseline_", "saved CPU baseline artefact (scikit-learn 1.8.0 pickle)"),
@@ -248,12 +248,12 @@ def purpose(rel: str) -> str:
 
 def iter_files():
     for p in sorted(ROOT.rglob("*")):
-        if p.is_file() and not (set(p.relative_to(ROOT).parts) & EXCLUDE_DIRS) and p.name != RELEASE_ZIP.name:
+        if p.is_file() and not (set(p.relative_to(ROOT).parts) & EXCLUDE_DIRS) and p.name != RELEASE_ZIP.name and not p.name.endswith(".bak") and ".bak_" not in p.name:
             yield p
 
 
 def in_release(rel: str) -> bool:
-    return not (rel.startswith(NOT_IN_RELEASE) or rel.startswith("data/processed/mars_nlp_processed"))
+    return not (rel.startswith(NOT_IN_RELEASE) or rel in ("data/processed/mars_nlp_processed.csv", "data/processed/mars_nlp_processed.xlsx"))
 
 
 def manifest(zip_path_note: str) -> str:

@@ -44,7 +44,7 @@ After the repository source/test fixes, the available source-only test suite com
 
 ## 3. Snapshot-local QA re-run (this repository copy)
 
-`python -m src.qa_check` at 2026-10-13 21:09:59: PASS=50 FAIL=0 PENDING=3 SKIP=0.
+`python -m src.qa_check` at 2026-10-14 19:33:34: PASS=50 FAIL=0 PENDING=3 SKIP=0.
 
 The 3 PENDING items are listed in Section 2; they stay PENDING until the raw Colab artifacts are copied into this folder (`experiments/results/transformer_*`, `predictions/transformer_predictions_*.csv`) and `python -m src.qa_check` is re-run.
 
@@ -52,7 +52,7 @@ The 3 PENDING items are listed in Section 2; they stay PENDING until the raw Col
 |---|---|---|
 | syntax: compileall src/app/tests | PASS |  |
 | imports: every src module imports (no circular/broken imports) | PASS |  |
-| pytest -q | PASS | 68 passed in 18.51s |
+| pytest -q | PASS | 68 passed in 21.51s |
 | dataset validation (src.validate_data, exit code) | PASS | 0 critical failures |
 | leakage: no group in >1 split; every variant in its original's split | PASS | {'groups_in_multiple_splits': 0, 'example_groups': [], 'variants_with_split_different_from_original': 0} |
 | leakage: no exact text overlap between splits | PASS | 0 shared |

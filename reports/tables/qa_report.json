@@ -26,7 +26,7 @@
     {
       "check": "pytest -q",
       "status": "PASS",
-      "detail": "68 passed in 18.51s",
+      "detail": "68 passed in 18.68s",
       "group": "core"
     },
     {
@@ -432,5 +432,5 @@
       "group": "core"
     }
   ],
-  "generated": "2026-10-13 21:09:59"
+  "generated": "2026-10-14 19:38:54"
 }

@@ -6,7 +6,7 @@
 **Affiliation:** Independent Researcher  
 **Email:** rizwan01107@gmail.com
 
-Generated 2026-10-13 21:10:27 by `python -m src.make_final_package` from saved results only (no training or dataset rebuild).
+Generated 2026-10-14 19:34:42 by `python -m src.make_final_package` from saved results only (no training or dataset rebuild).
 
 ## 1. Dataset
 
@@ -60,8 +60,8 @@ Residual similarity of test originals to their most similar training original (c
 
 ## 5. Checksum verification
 
-* Expected SHA-256 (`data/processed/mars_nlp_processed.sha256`): `741146be0540eab95495770e5aa346b11640ed945c8935b58082156bab81fd9d`
-* Recomputed at generation time: `741146be0540eab95495770e5aa346b11640ed945c8935b58082156bab81fd9d` -> **MATCH**
+* Expected SHA-256 (`data/processed/mars_nlp_processed.sha256`): `8ee14e8791ac55e3db9e6bee6ce0535052b040d172ebbc4a5b9320734479a59c`
+* Recomputed at generation time: `8ee14e8791ac55e3db9e6bee6ce0535052b040d172ebbc4a5b9320734479a59c` -> **MATCH**
 * Every transformer training run verifies this checksum before training and aborts on mismatch.
 
 ## 6. Split fingerprints (SHA-256 of sorted original message ids per split)

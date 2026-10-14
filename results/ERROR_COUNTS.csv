@@ -11,5 +11,5 @@ word_nb_aug,TFIDF-word + NaiveBayes (aug-trained),359,140,219,experiments/result
 char_lr_aug,TFIDF-char + LogisticRegression (aug-trained),159,29,130,experiments/results/error_analysis.csv
 char_svm_aug,TFIDF-char + LinearSVM (aug-trained),146,13,133,experiments/results/error_analysis.csv
 char_nb_aug,TFIDF-char + NaiveBayes (aug-trained),423,202,221,experiments/results/error_analysis.csv
-mbert,mBERT,614,n/a,n/a,results/verified_transformer_results.json (FP/FN split needs the raw predictions file)
-xlmr,XLM-R,264,n/a,n/a,results/verified_transformer_results.json (FP/FN split needs the raw predictions file)
+mbert,mBERT,614,n/a,n/a,results/verified_transformer_results.json (owner-verified; FP/FN split requires raw predictions)
+xlmr,XLM-R,264,n/a,n/a,results/verified_transformer_results.json (owner-verified; FP/FN split requires raw predictions)

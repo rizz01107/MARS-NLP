@@ -142,10 +142,10 @@ Both transformers were fine-tuned on the same 4,308 training originals (Table 5)
 
 *Table 5. Transformer training details and computational benchmarks (NVIDIA Tesla T4).*
 
-| Model                                | Parameters   |   Size (MB) |   Best epoch |   Train time (s) |   GPU ms/msg |   CPU ms/msg |   Macro-F1 | 95% CI         |
-|:-------------------------------------|:-------------|------------:|-------------:|-----------------:|-------------:|-------------:|-----------:|:---------------|
-| mBERT (bert-base-multilingual-cased) | 177,854,978  |    681.3000 |            2 |         287.5000 |       9.5200 |     125.6500 |     0.8772 | [0.754, 0.970] |
-| XLM-RoBERTa (xlm-roberta-base)       | 278,045,186  |   1077.0000 |            4 |         295.6000 |      10.2500 |     117.4800 |     0.9722 | [0.946, 0.987] |
+| Model                                |   Parameters |   Size (MB) |   Best epoch |   Train time (s) |   GPU ms/msg |   CPU ms/msg |   Macro-F1 | 95% CI         |
+|:-------------------------------------|-------------:|------------:|-------------:|-----------------:|-------------:|-------------:|-----------:|:---------------|
+| mBERT (bert-base-multilingual-cased) |  177,854,978 |    681.3000 |            2 |         287.5000 |       9.5200 |     125.6500 |     0.8772 | [0.754, 0.970] |
+| XLM-RoBERTa (xlm-roberta-base)       |  278,045,186 |   1077.0000 |            4 |         295.6000 |      10.2500 |     117.4800 |     0.9722 | [0.946, 0.987] |
 
 ### 5.3 Statistical Comparison
 
@@ -239,7 +239,7 @@ Computationally, the transformers require hundreds of megabytes and, on a CPU, o
 
 ## 8. Reproducibility
 
-*Code and data.* The repository contains the data-building, splitting, validation, training, evaluation, robustness and reporting code. Third-party data are not redistributed: the processed corpus is rebuilt deterministically from the original UCI and Zenodo files and verified against a SHA-256 checksum (`741146be0540eab95495770e5aa346b11640ed945c8935b58082156bab81fd9d`) and split fingerprints (training cb20c5190816..., validation f155bbf81741..., test 727092f30d11...). Every training run verifies the checksum and aborts on a mismatch or on any group overlap between splits.
+*Code and data.* The repository contains the data-building, splitting, validation, training, evaluation, robustness and reporting code. Third-party data are not redistributed: the processed corpus is rebuilt deterministically from the original UCI and Zenodo files and verified against a SHA-256 checksum (`8ee14e8791ac55e3db9e6bee6ce0535052b040d172ebbc4a5b9320734479a59c`) and split fingerprints (training cb20c5190816..., validation f155bbf81741..., test 727092f30d11...). Every training run verifies the checksum and aborts on a mismatch or on any group overlap between splits.
 
 *Quality assurance.* The original Colab execution reported **47 PASS, 0 FAIL, 0 PENDING, 0 SKIP**. The final local release-package QA reports **50 PASS, 0 FAIL, 3 PENDING, 0 SKIP**. The three pending checks arise only because the raw Colab transformer artifacts are absent from the final local workspace:
 

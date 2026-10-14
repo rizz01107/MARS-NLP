@@ -1,12 +1,12 @@
 # QA report
 
-Generated 2026-10-13 21:09:59. PASS=50 FAIL=0 PENDING=3 SKIP=0. Raw transformer run files present for: none.
+Generated 2026-10-14 19:38:54. PASS=50 FAIL=0 PENDING=3 SKIP=0. Raw transformer run files present for: none.
 
 | Check | Status | Detail |
 |---|---|---|
 | syntax: compileall src/app/tests | PASS |  |
 | imports: every src module imports (no circular/broken imports) | PASS |  |
-| pytest -q | PASS | 68 passed in 18.51s |
+| pytest -q | PASS | 68 passed in 18.68s |
 | dataset validation (src.validate_data, exit code) | PASS | 0 critical failures |
 | leakage: no group in >1 split; every variant in its original's split | PASS | {'groups_in_multiple_splits': 0, 'example_groups': [], 'variants_with_split_different_from_original': 0} |
 | leakage: no exact text overlap between splits | PASS | 0 shared |

@@ -1,6 +1,6 @@
 # FINAL GPU REVIEW
 
-Generated 2026-10-13 21:10:00 by `python -m src.make_gpu_review` from result files only.
+Generated 2026-10-14 19:38:56 by `python -m src.make_gpu_review` from result files only.
 
 ## STATUS: EXECUTED on NVIDIA Tesla T4 - owner-verified summary
 
@@ -89,7 +89,7 @@ The Colab run logs (`experiments/results/logs/`) are not part of this snapshot, 
 
 ## QA suite
 
-`python -m src.qa_check` at 2026-10-13 21:09:59: PASS=50 FAIL=0 PENDING=3 SKIP=0; transformers executed per QA: none.
+`python -m src.qa_check` at 2026-10-14 19:38:54: PASS=50 FAIL=0 PENDING=3 SKIP=0; transformers executed per QA: none.
 
 Failed or pending checks:
 
