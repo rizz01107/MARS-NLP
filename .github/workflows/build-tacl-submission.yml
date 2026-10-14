@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - "submission/tacl_submission.md"
+      - "submission/build_tacl.py"
       - ".github/workflows/build-tacl-submission.yml"
 
 permissions:
@@ -18,33 +19,40 @@ jobs:
       - name: Install Pandoc and LaTeX
         run: |
           sudo apt-get update
-          sudo apt-get install -y pandoc texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
-      - name: Build anonymized PDF
+          sudo apt-get install -y pandoc texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended poppler-utils
+      - name: Download official TACL submission style
         run: |
           mkdir -p submission/build
-          pandoc submission/tacl_submission.md \
-            --from markdown+pipe_tables+tex_math_dollars \
-            --template https://raw.githubusercontent.com/acl-org/acl-style-files/master/latex/acl_latex.tex \
-            -V documentclass=article \
-            -V fontsize=11pt \
-            -V geometry:a4paper \
-            -V geometry:margin=1in \
-            -V anonymous=true \
-            -V natbib=true \
-            --pdf-engine=pdflatex \
-            -o submission/build/MARS_NLP_TACL_Anonymous.pdf
-      - name: Verify PDF exists and no author identifiers
+          curl -fL https://transacl.org/tacl-submission-templates/tacl2021v1.sty -o submission/build/tacl2021v1.sty
+          curl -fL https://transacl.org/tacl-submission-templates/acl_natbib.bst -o submission/build/acl_natbib.bst
+          test -s submission/build/tacl2021v1.sty
+      - name: Convert manuscript using TACL style
+        run: |
+          python submission/build_tacl.py submission/tacl_submission.md submission/build
+          cd submission/build
+          pdflatex -interaction=nonstopmode -halt-on-error main.tex
+          pdflatex -interaction=nonstopmode -halt-on-error main.tex
+      - name: Verify PDF and anonymity
         run: |
           test -s submission/build/MARS_NLP_TACL_Anonymous.pdf
-          pdfinfo submission/build/MARS_NLP_TACL_Anonymous.pdf | grep -E "Pages:|Page size:"
-          pdftotext submission/build/MARS_NLP_TACL_Anonymous.pdf submission/build/paper.txt
+          pdfinfo submission/build/MARS_NLP_TACL_Anonymous.pdf | tee submission/build/pdfinfo.txt
+          pdftotext -layout submission/build/MARS_NLP_TACL_Anonymous.pdf submission/build/paper.txt
           if grep -Eiq 'Muhammad Rizwan|rizwan01107@gmail.com' submission/build/paper.txt; then
             echo "Author identifier leaked into anonymized PDF"
             exit 1
           fi
-      - name: Upload PDF
+          if pdfinfo submission/build/MARS_NLP_TACL_Anonymous.pdf | grep -Eiq 'Author:.*(Rizwan|Muhammad)'; then
+            echo "Author identifier leaked into PDF metadata"
+            exit 1
+          fi
+          echo "PDF built with official TACL submission style and checked for obvious author identifiers."
+      - name: Upload PDF and source
         uses: actions/upload-artifact@v4
         with:
           name: MARS-NLP-TACL-Anonymous-PDF
-          path: submission/build/MARS_NLP_TACL_Anonymous.pdf
+          path: |
+            submission/build/MARS_NLP_TACL_Anonymous.pdf
+            submission/build/main.tex
+            submission/build/tacl2021v1.sty
+            submission/build/acl_natbib.bst
           if-no-files-found: error
