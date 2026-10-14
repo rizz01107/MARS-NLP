@@ -35,6 +35,7 @@ body = body.replace(r"\includegraphics{../figures/mars_nlp_pipeline.png}",
 (outdir / "body.tex").write_text(body, encoding="utf-8")
 
 tex = r"""\documentclass[11pt]{article}
+\providecommand{\tightlist}{}
 \usepackage{tacl2021v1}
 \usepackage{times}
 \usepackage{latexsym}
