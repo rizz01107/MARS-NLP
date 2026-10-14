@@ -395,7 +395,9 @@ def check_manuscript() -> None:
     miss = [h for h in MS_SECTIONS if h not in heads]
     add("manuscript: all required sections present", "PASS" if not miss else "FAIL", str(miss), group="documentation")
     head_ok = all(x in t for x in (TITLE, "Muhammad Rizwan", "Independent Researcher", "rizwan01107@gmail.com"))
-    add("manuscript: title, author, affiliation, email", "PASS" if head_ok else "FAIL", group="documentation")\n    disclosure_ok = all(x in t for x in ("AI-Assisted Tools Disclosure", "ChatGPT (OpenAI)", "Claude (Anthropic)", "author takes responsibility"))\n    add("manuscript: transparent AI-tool disclosure and author responsibility", "PASS" if disclosure_ok else "FAIL", group="documentation")
+    add("manuscript: title, author, affiliation, email", "PASS" if head_ok else "FAIL", group="documentation")
+    disclosure_ok = all(x in t for x in ("AI-Assisted Tools Disclosure", "ChatGPT (OpenAI)", "Claude (Anthropic)", "author takes responsibility"))
+    add("manuscript: transparent AI-tool disclosure and author responsibility", "PASS" if disclosure_ok else "FAIL", group="documentation")
     fin = pd.read_csv(root / "results/FINAL_RESULTS.csv", keep_default_na=False)
     miss_m = []
     for r in fin.itertuples():
