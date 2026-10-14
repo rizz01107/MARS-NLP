@@ -80,6 +80,6 @@ def test_transformer_helpers_without_torch():
     assert T.run_tag(args) == "xlmr_train-English_smoke"
 
 
-@pytest.mark.skipif(__import__("importlib").util.find_spec("torch") is None, reason="torch not installed (GPU run is pending)")
+@pytest.mark.skipif(__import__("importlib").util.find_spec("torch") is None or __import__("importlib").util.find_spec("transformers") is None,\n                       reason="torch/transformers not installed (optional transformer dependencies)")
 def test_transformer_requires_hub_or_local_model():
     assert T._require_torch()
