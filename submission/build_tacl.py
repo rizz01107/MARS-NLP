@@ -43,6 +43,8 @@ tex = r"""\documentclass[11pt]{article}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
 \usepackage{microtype}
 \title{TITLE_PLACEHOLDER}
 \author{Anonymous}
