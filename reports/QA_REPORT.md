@@ -38,6 +38,10 @@ Provenance: Owner-supplied verified summary of the Google Colab (NVIDIA Tesla T4
 
 These three local checks are PENDING because the raw Colab artifacts are missing; **they are not failures** (0 local checks failed) and are not converted to PASS without actual raw evidence.
 
+## 4. Post-edit source-only regression check (2026-10-14)
+
+After the repository source/test fixes, the available source-only test suite completed with **50 passed, 10 skipped, 0 failed**; `python -m compileall -q src app tests` also completed successfully. The skips are expected in this checkout because optional transformer dependencies, trained model files, or generated message-text analysis artifacts are not all present. This check does **not** replace the full dataset/checksum/leakage QA above or independently verify the missing raw Colab transformer artifacts.
+
 ## 3. Snapshot-local QA re-run (this repository copy)
 
 `python -m src.qa_check` at 2026-10-13 21:09:59: PASS=50 FAIL=0 PENDING=3 SKIP=0.
