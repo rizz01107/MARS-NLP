@@ -123,7 +123,27 @@ def statistical_df() -> pd.DataFrame:
 
 
 def error_counts_df() -> pd.DataFrame:
-    e = pd.read_csv(R / "error_analysis.csv")
+    """Build per-model error counts without requiring excluded message-text artifacts.
+
+    The raw error_analysis.csv contains third-party message text and is intentionally not
+    committed. When absent, retain the saved curated counts rather than failing or silently
+    substituting originals-only prediction counts, which are not comparable to the published
+    originals-plus-variants counts.
+    """
+    error_file = R / "error_analysis.csv"
+    curated_file = C.ROOT_DIR / "results" / "ERROR_COUNTS.csv"
+    if not error_file.exists():
+        if not curated_file.exists():
+            raise FileNotFoundError(
+                "error_analysis.csv is excluded because it contains message text, and "
+                "results/ERROR_COUNTS.csv is unavailable. Run `python -m src.error_analysis` "
+                "with the locally rebuilt dataset and trained models, or restore the curated counts."
+            )
+        saved = pd.read_csv(curated_file, keep_default_na=False)
+        saved["Source"] = "results/ERROR_COUNTS.csv (saved curated counts; raw message-text artifact excluded)"
+        return saved
+
+    e = pd.read_csv(error_file)
     names = pd.read_csv(R / "baseline_results.csv").query("subset == 'Overall'")[["model_id", "model"]].drop_duplicates()
     kind = e.error_category.str.split("|").str[0]
     sup = load_supplement()
