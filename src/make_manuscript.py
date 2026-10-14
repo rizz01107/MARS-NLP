@@ -312,7 +312,11 @@ Computationally, the transformers require hundreds of megabytes and, on a CPU, o
 
 On two public SMS corpora and under a group-aware protocol, character-level TF-IDF classifiers were strong baselines: character TF-IDF with logistic regression achieved the highest observed test macro-F1 ({F.loc['Char TF-IDF + Logistic Regression', 'Macro_F1']:.4f}), and the validation-selected character SVM reached {F.loc['Char TF-IDF + Linear SVM', 'Macro_F1']:.4f}. XLM-R was the best-performing transformer ({xr['macro_f1']:.4f}) but did not detectably differ from the selected SVM, and mBERT was lower ({mb['macro_f1']:.4f}). Under the synthetic perturbation suite the SVM degraded least, while the evidence for Roman Urdu/Mixed text, limited to five independent test groups, remains descriptive. The transformer metrics are owner-verified results of the original GPU run. Future work includes a larger and more diverse Roman Urdu and Urdu-script corpus, repeated transformer runs, naturally occurring and adversarial perturbations, and interpretability analysis of the transformers.
 
-## 10. References
+## 10. AI-Assisted Tools Disclosure
+
+AI-assisted tools, including ChatGPT (OpenAI) and Claude (Anthropic), were used as aids during parts of the coding, debugging, code review, and manuscript/documentation editing workflow. The author also performed hands-on implementation and repository work, ran and inspected experiments including the Google Colab GPU workflow, reviewed outputs, and made the research and reporting decisions. AI tools were used as assistants rather than as authors or independent validators; the author takes responsibility for the code, analysis, interpretation, and final manuscript. The transformer metrics remain identified as owner-verified because their original raw run artifacts are not present in this repository snapshot.
+
+## 11. References
 
 {REFS}
 """
