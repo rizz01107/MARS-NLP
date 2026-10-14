@@ -26,7 +26,7 @@ Checked items were verified from files or by `python -m src.qa_check`; evidence 
 | [x] | Error analysis | manuscript section 5.5; `results/ERROR_COUNTS.csv` (per model, not aggregated) |
 | [x] | Limitations | manuscript section 7 (all required limitations; checked by `qa_check`) |
 | [x] | Conclusion | manuscript section 9 |
-| [x] | References | manuscript section 10 (core: Devlin, Conneau, Pedregosa; all cited) |
+| [x] | References | manuscript section 11 (core: Devlin, Conneau, Pedregosa; all cited) |
 | [x] | Tables | manuscript Tables 1-9; `results/*.csv` |
 | [x] | Figures | `figures/` (300 dpi PNG + PDF), embedded as Figures 1-3 in the manuscript |
 | [x] | Reproducibility information | manuscript section 8; `reports/FINAL_REPRODUCIBILITY_REPORT.md`; `docs/COLAB_GPU.md`; `data/README.md` |
@@ -37,7 +37,7 @@ Checked items were verified from files or by `python -m src.qa_check`; evidence 
 | [x] | No contradictory metrics | `qa_check`: manuscript and results tables equal `results/*.csv` and the owner-verified table |
 | [x] | No unsupported claims | automated wording checks (no 'best overall', 'significantly outperforms' or leading-performance claim); the author must still proofread |
 | [x] | AI-assisted tools disclosure | Manuscript section 10 and README describe use of ChatGPT and Claude, with author responsibility stated. |
-| [ ] | PDF manuscript synchronized with current Markdown | PDF must be regenerated after the AI-use disclosure and section numbering changes (`scripts/build_manuscript_pdf.sh`). |
+| [x] | PDF manuscript synchronized with current Markdown | PDF regenerated from the current Markdown by the release workflow; PDF text extraction confirms the disclosure and references are present. |
 
 ## Verification status of the transformer results
 
@@ -55,7 +55,7 @@ These three local checks are PENDING because the raw Colab artifacts are missing
 
 - [ ] Raw Colab transformer artifacts (mBERT, XLM-R) were unavailable in the final local workspace: the 3 PENDING local QA checks (missing raw mBERT artifacts, missing raw XLM-R artifacts, no-N/A verification for executed transformer runs) stay PENDING - not failures - until the artifacts are supplied. Copy the Colab raw files (`experiments/results/transformer_*`, `predictions/transformer_predictions_*.csv`, logs) into the repository and run `python -m src.qa_check` so the transformer values are recomputed locally (currently owner-verified summary only).
 - [ ] Confirm the Zenodo dataset license (unverified) and the UCI CC BY 4.0 statement against the live records before redistributing any data.
-- [ ] Regenerate the PDF after the manuscript disclosure/source changes; then compare it against the Markdown manuscript.
+- [x] Regenerated the PDF from the current Markdown; verified the PDF is readable and contains the AI-use disclosure and references.
 - [ ] Regenerate `RELEASE_MANIFEST.md` and the release archive after all final edits so file hashes, file lists, and archive contents match the current repository.
 - [ ] Proofread the generated report text; adapt formatting to the target venue.
 - [ ] Check the target journal's AI-use disclosure policy and adjust the disclosure to its required wording before submission.
