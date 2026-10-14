@@ -1,0 +1,221 @@
+name: Finalize manuscript and release bundle
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "reports/MARS_NLP_Final_Manuscript.md"
+      - "scripts/build_manuscript_pdf.sh"
+      - ".github/workflows/finalize-release.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: finalize-mars-nlp-release
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install manuscript tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc wkhtmltopdf poppler-utils zip
+
+      - name: Rebuild manuscript PDF
+        run: bash scripts/build_manuscript_pdf.sh
+
+      - name: Verify PDF and synchronize checklist
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s reports/MARS_NLP_Final_Manuscript.pdf
+          pdfinfo reports/MARS_NLP_Final_Manuscript.pdf
+          pdftotext reports/MARS_NLP_Final_Manuscript.pdf /tmp/mars-manuscript.txt
+          grep -qi "AI-Assisted Tools Disclosure" /tmp/mars-manuscript.txt
+          grep -qi "References" /tmp/mars-manuscript.txt
+          python - <<'PY'
+          from pathlib import Path
+          p = Path("SUBMISSION_CHECKLIST.md")
+          s = p.read_text(encoding="utf-8")
+          s = s.replace("manuscript section 10 (core: Devlin, Conneau, Pedregosa; all cited)",
+                        "manuscript section 11 (core: Devlin, Conneau, Pedregosa; all cited)")
+          s = s.replace("PDF must be regenerated after the AI-use disclosure and section numbering changes (`scripts/build_manuscript_pdf.sh`).",
+                        "PDF regenerated from the current Markdown by the release workflow; PDF text extraction confirms the disclosure and references are present.")
+          s = s.replace("| [ ] | PDF manuscript synchronized with current Markdown |",
+                        "| [x] | PDF manuscript synchronized with current Markdown |")
+          s = s.replace("- [ ] Regenerate the PDF after the manuscript disclosure/source changes; then compare it against the Markdown manuscript.",
+                        "- [x] Regenerated the PDF from the current Markdown; verified the PDF is readable and contains the AI-use disclosure and references.")
+          p.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Rebuild file manifest and release archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from datetime import datetime, timezone
+          from hashlib import sha256
+          from pathlib import Path
+          import subprocess, zipfile
+
+          root = Path(".")
+          manifest_path = root / "RELEASE_MANIFEST.md"
+          old = manifest_path.read_text(encoding="utf-8")
+          purposes = {}
+          required = {}
+          in_table = False
+          for line in old.splitlines():
+              if line.startswith("| path"):
+                  in_table = True
+                  continue
+              if in_table and line.startswith("|---"):
+                  continue
+              if in_table and line.startswith("|"):
+                  cells = [c.strip() for c in line.strip().strip("|").split("|")]
+                  if len(cells) >= 6:
+                      purposes[cells[0]] = cells[1]
+                      required[cells[0]] = cells[4]
+
+          tracked = subprocess.check_output(["git", "ls-files", "-z"]).decode().split("\0")
+          excluded_exact = {
+              "MARS-NLP-release.zip",
+              "experiments/results/error_analysis.csv",
+              "reports/tables/explain_examples.csv",
+          }
+          excluded_prefixes = (
+              "data/raw/uci/", "data/raw/zenodo/", "backups/", ".venv/", ".venv311/",
+              "venv/", "models/transformers/",
+          )
+          def include(name):
+              if not name or name in excluded_exact or name.startswith(excluded_prefixes):
+                  return False
+              if name.endswith((".bak", ".tar.gz", ".before_rebuild", ".pt", ".bin", ".safetensors")):
+                  return False
+              if "/.ipynb_checkpoints/" in name or name.startswith(".git/"):
+                  return False
+              if name in {"data/processed/mars_nlp_processed.csv", "data/processed/mars_nlp_processed.xlsx"}:
+                  return False
+              return (root / name).is_file()
+
+          files = sorted(name for name in tracked if include(name))
+          if "RELEASE_MANIFEST.md" not in files:
+              raise SystemExit("RELEASE_MANIFEST.md missing from archive file set")
+
+          def purpose(name):
+              if name in purposes:
+                  return purposes[name]
+              if name.startswith("tests/") or name.startswith("src/") or name.startswith("scripts/"):
+                  return "source code / reproducibility tooling"
+              if name.startswith("reports/") or name.startswith("results/") or name.startswith("experiments/"):
+                  return "research outputs / audit evidence"
+              if name.startswith("figures/"):
+                  return "publication figures"
+              if name.startswith("docs/") or name.startswith("data/"):
+                  return "reproducibility and data documentation"
+              if name.startswith("models/"):
+                  return "saved CPU baseline artefact"
+              return "project documentation / configuration"
+
+          def req(name):
+              if name in required:
+                  return required[name]
+              if name.startswith(("src/", "tests/", "scripts/", "docs/", "experiments/configs/")):
+                  return "yes"
+              if name.startswith(("reports/", "results/", "figures/", "experiments/results/")):
+                  return "evidence"
+              return "no"
+
+          def digest(name):
+              return sha256((root / name).read_bytes()).hexdigest()
+
+          def build_manifest(archive_bytes):
+              now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+              total = sum((root / n).stat().st_size for n in files)
+              size_mb = archive_bytes / 1_000_000
+              total_mb = total / 1_000_000
+              intro = [
+                  "# Release manifest", "",
+                  "**Author:** Muhammad Rizwan  ",
+                  "**Affiliation:** Independent Researcher  ",
+                  "**Email:** rizwan01107@gmail.com", "",
+                  f"Generated {now}. Release archive: `MARS-NLP-release.zip`.",
+                  "",
+                  f"* Files listed: {len(files)}; total uncompressed size: {total_mb:.1f} MB; in release archive: {len(files)} files, {size_mb:.2f} MB ({archive_bytes:,} bytes).",
+                  "* **Excluded from the archive:** third-party raw data (`data/raw/uci`, `data/raw/zenodo`; Zenodo license unverified), the processed corpus (rebuild with `python -m src.build_dataset` and verify `data/processed/mars_nlp_processed.sha256`), and fine-tuned transformer checkpoints (reproduce with `docs/COLAB_GPU.md`).",
+                  "* Also excluded: files containing dataset message text (`experiments/results/error_analysis.csv`, `reports/tables/explain_examples.csv`), local virtual environments, backups and temporary files.",
+                  "* `required_for_reproduction`: yes = needed to rerun/verify; evidence = saved outputs kept for audit; no = convenience.",
+                  "",
+                  "| path | purpose | size_bytes | sha256 | required_for_reproduction | in_release_archive |",
+                  "|:---|:---|---:|:---|:---|:---|",
+              ]
+              rows = []
+              for name in files:
+                  size = (root / name).stat().st_size
+                  h = "omitted (self-referential)" if name == "RELEASE_MANIFEST.md" else digest(name)
+                  rows.append(f"| {name} | {purpose(name)} | {size} | {h} | {req(name)} | yes |")
+              return "\n".join(intro + rows) + "\n"
+
+          archive = root / "MARS-NLP-release.zip"
+          last = None
+          for _ in range(8):
+              # First render with the previous size; archive size converges because its field width stabilizes.
+              manifest_path.write_text(build_manifest(last or 0), encoding="utf-8")
+              with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as z:
+                  for name in files:
+                      z.write(root / name, arcname=name)
+              current = archive.stat().st_size
+              manifest_path.write_text(build_manifest(current), encoding="utf-8")
+              with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as z:
+                  for name in files:
+                      z.write(root / name, arcname=name)
+              confirmed = archive.stat().st_size
+              if confirmed == current and confirmed == last:
+                  break
+              last = confirmed
+          # Final archive always contains the final manifest bytes.
+          manifest_path.write_text(build_manifest(archive.stat().st_size), encoding="utf-8")
+          with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as z:
+              for name in files:
+                  z.write(root / name, arcname=name)
+          final_bytes = archive.stat().st_size
+          print(f"Archive files: {len(files)}; ZIP size: {final_bytes:,} bytes")
+          with zipfile.ZipFile(archive) as z:
+              bad = z.testzip()
+              if bad:
+                  raise SystemExit(f"ZIP integrity failure: {bad}")
+              if len(z.namelist()) != len(files):
+                  raise SystemExit("ZIP file count does not match manifest")
+          print("ZIP integrity: PASS")
+          PY
+
+      - name: Commit synchronized manuscript and manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/MARS_NLP_Final_Manuscript.pdf SUBMISSION_CHECKLIST.md RELEASE_MANIFEST.md
+          if ! git diff --cached --quiet; then
+            git commit -m "Finalize manuscript PDF and release manifest"
+            git push origin HEAD:main
+          fi
+
+      - name: Publish v1.0.1 release bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view v1.0.1 >/dev/null 2>&1; then
+            gh release create v1.0.1 MARS-NLP-release.zip \
+              --title "MARS-NLP Research Release v1.0.1" \
+              --target main \
+              --notes "Updated release bundle. The manuscript PDF was regenerated from the current Markdown and checked for the AI-assisted tools disclosure and references. The manifest lists the archive contents and checksums. The manuscript has not been peer reviewed. Three transformer-related QA checks remain pending because original raw Colab artifacts are unavailable; transformer metrics remain labelled owner-verified. Dataset files with unverified redistribution rights are not included."
+          else
+            echo "Release v1.0.1 already exists; leaving the published release asset unchanged."
+          fi
