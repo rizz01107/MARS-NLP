@@ -31,14 +31,45 @@ body = subprocess.check_output([
 ], text=True, cwd=Path.cwd())
 body = body.replace(r"\includegraphics{../figures/mars_nlp_pipeline.png}",
                     r"\includegraphics[width=0.9\linewidth]{../../figures/mars_nlp_pipeline.png}")
-# TACL uses a two-column layout; Pandoc's default longtable is incompatible.
-# Convert generated longtable blocks to regular floating table/tabular blocks.
-body = re.sub(r"\\\\begin\{longtable\}(?:\[[^\]]*\])?\{([^}]*)\}", r"\\\\begin{table}[t]\\\\centering\\\\small\\\\begin{tabular}{\1}", body)
-body = body.replace(r"\\\\endhead", "")
-body = body.replace(r"\\\\endfirsthead", "")
-body = body.replace(r"\\\\endfoot", "")
-body = body.replace(r"\\\\endlastfoot", "")
-body = body.replace(r"\\\\end{longtable}", r"\\\\end{tabular}\\\\end{table}")
+# TACL uses a two-column layout; convert Pandoc longtable environments safely.
+# Parse the column-spec argument with balanced braces (Pandoc can emit nested braces).
+def convert_longtables(latex):
+    out = []
+    pos = 0
+    marker = r"\begin{longtable}"
+    while True:
+        idx = latex.find(marker, pos)
+        if idx < 0:
+            out.append(latex[pos:])
+            break
+        out.append(latex[pos:idx])
+        spec_start = latex.find("{", idx + len(marker))
+        if spec_start < 0:
+            out.append(latex[idx:])
+            break
+        depth = 0
+        spec_end = None
+        for k in range(spec_start, len(latex)):
+            if latex[k] == "{":
+                depth += 1
+            elif latex[k] == "}":
+                depth -= 1
+                if depth == 0:
+                    spec_end = k
+                    break
+        if spec_end is None:
+            out.append(latex[idx:])
+            break
+        colspec = latex[spec_start + 1:spec_end]
+        out.append(r"\begin{table*}[t]\centering\small\begin{tabular}{" + colspec + "}")
+        pos = spec_end + 1
+    latex = "".join(out)
+    for marker in (r"\endhead", r"\endfirsthead", r"\endfoot", r"\endlastfoot"):
+        latex = latex.replace(marker, "")
+    latex = latex.replace(r"\end{longtable}", r"\end{tabular}\end{table*}")
+    return latex
+
+body = convert_longtables(body)
 # Remove accidental Markdown-only raw links around the pipeline if pandoc emits paths differently.
 (outdir / "body.tex").write_text(body, encoding="utf-8")
 
