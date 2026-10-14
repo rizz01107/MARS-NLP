@@ -129,5 +129,8 @@ notebooks/     01-07 executed notebooks      src/   pipeline code      tests/   
 requirements.txt  requirements-colab.txt  environment.yml  CITATION.cff  LICENSE  SUBMISSION_CHECKLIST.md  RELEASE_MANIFEST.md
 ```
 
+## AI-assisted tools disclosure
+ChatGPT (OpenAI) and Claude (Anthropic) were used as aids during parts of the coding, debugging, code review, and manuscript/documentation editing workflow. The author also carried out hands-on implementation and repository work, ran and inspected experiments including the Google Colab GPU workflow, reviewed outputs, and made the research and reporting decisions. AI tools were not treated as independent validators; the author is responsible for the code, analysis, interpretations, and final manuscript. Transformer metrics remain labelled owner-verified because the original raw run artifacts are not present in this repository snapshot.
+
 ## Citation
 If you use this work, cite it as software/manuscript (see `CITATION.cff`): Muhammad Rizwan, *MARS-NLP: Robust Multilingual Scam Message Classification with Character-Level and Transformer-Based NLP*, Independent Researcher (unpublished manuscript). Please also cite the data sources - Almeida, Gomez Hidalgo & Yamakami (2011), DocEng '11; Siddiq, *Roman Urdu Phishing SMS Dataset for Smishing Detection Research*, Zenodo, DOI 10.5281/zenodo.21810885 - and the core methods: Devlin et al. (2019), NAACL-HLT (BERT); Conneau et al. (2020), ACL (XLM-R); Pedregosa et al. (2011), JMLR (scikit-learn). Code license: MIT (code only; the datasets keep their own terms).
