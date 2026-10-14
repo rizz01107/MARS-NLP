@@ -36,6 +36,7 @@ Checked items were verified from files or by `python -m src.qa_check`; evidence 
 | [x] | QA report | `reports/QA_REPORT.md`: owner-verified Colab QA 47 PASS / 0 FAIL / 0 PENDING / 0 SKIP; local release-package QA 50 PASS / 0 FAIL / 3 PENDING / 0 SKIP |
 | [x] | No contradictory metrics | `qa_check`: manuscript and results tables equal `results/*.csv` and the owner-verified table |
 | [x] | No unsupported claims | automated wording checks (no 'best overall', 'significantly outperforms' or leading-performance claim); the author must still proofread |
+| [x] | AI-assisted tools disclosure | Manuscript section 10 and README describe use of ChatGPT and Claude, with author responsibility stated. |
 | [x] | PDF manuscript | `reports/MARS_NLP_Final_Manuscript.pdf` (`scripts/build_manuscript_pdf.sh`) |
 
 ## Verification status of the transformer results
@@ -54,5 +55,7 @@ These three local checks are PENDING because the raw Colab artifacts are missing
 
 - [ ] Raw Colab transformer artifacts (mBERT, XLM-R) were unavailable in the final local workspace: the 3 PENDING local QA checks (missing raw mBERT artifacts, missing raw XLM-R artifacts, no-N/A verification for executed transformer runs) stay PENDING - not failures - until the artifacts are supplied. Copy the Colab raw files (`experiments/results/transformer_*`, `predictions/transformer_predictions_*.csv`, logs) into the repository and run `python -m src.qa_check` so the transformer values are recomputed locally (currently owner-verified summary only).
 - [ ] Confirm the Zenodo dataset license (unverified) and the UCI CC BY 4.0 statement against the live records before redistributing any data.
+- [ ] Regenerate the PDF after the manuscript disclosure/source changes; then compare it against the Markdown manuscript.
 - [ ] Proofread the generated report text; adapt formatting to the target venue.
+- [ ] Check the target journal's AI-use disclosure policy and adjust the disclosure to its required wording before submission.
 - [ ] Optional: multi-seed transformer runs and per-language transformer subsets (needs raw files / new GPU runs).
