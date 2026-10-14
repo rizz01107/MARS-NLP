@@ -235,6 +235,7 @@ Computationally, the transformers require hundreds of megabytes and, on a CPU, o
 * SHAP and Integrated Gradients analyses were not performed, and no interpretability analysis of the transformers was carried out.
 * The raw transformer artifacts from the original Colab run were unavailable in the final local release workspace; the transformer metrics are therefore owner-verified results that have not been independently reproduced locally (see Section 8).
 * Language labels are heuristic, source and language are partly confounded, and the positive class differs in meaning between corpora (unsolicited marketing versus phishing). The Zenodo license is unverified.
+* AI-assisted workflow limitation: ChatGPT (OpenAI) and Claude (Anthropic) supported parts of coding, debugging, code review, and manuscript/documentation editing. Such tools can introduce errors and were not treated as independent validators; the author performed hands-on implementation, ran and reviewed experiments, and remains responsible for the work.
 
 ## 8. Reproducibility
 
