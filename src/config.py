@@ -51,7 +51,7 @@ SRC_ZENODO = "Roman Urdu Phishing SMS Dataset (Zenodo, DOI 10.5281/zenodo.218108
 URL_UCI = "https://archive.ics.uci.edu/dataset/228/sms+spam+collection"
 URL_ZENODO = "https://zenodo.org/records/21810885"
 LICENSE_UCI = "CC BY 4.0 (as reported on UCI page; bundled readme: free use, copyright + citation request)"
-LICENSE_ZENODO = "CC BY 4.0 (Creative Commons Attribution 4.0 International; verified on Zenodo record)"
+LICENSE_ZENODO = "UNVERIFIED (confirm the Zenodo record before redistribution)"
 
 # ---- perturbations -------------------------------------------------------
 NO_PERTURBATION = "none"
