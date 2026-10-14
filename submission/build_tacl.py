@@ -22,11 +22,48 @@ abstract_md = abstract_match.group(1).strip()
 keywords = keywords_match.group(1).strip().replace("\n", " ").replace(";", ",")
 text = text[re.search(r"(?m)^## 1\. Introduction\s*$", text).start():]
 
-# Convert Markdown body with Pandoc; retain tables, math, and figures.
+# Convert Markdown tables to readable row-wise text before Pandoc.
+# This preserves all table values while avoiding unsupported width-based longtable
+# column specs in the two-column TACL layout.
+def split_pipe_row(line):
+    line = line.strip()
+    if line.startswith("|"):
+        line = line[1:]
+    if line.endswith("|"):
+        line = line[:-1]
+    return [cell.strip().replace(r"\\|", "|") for cell in line.split("|")]
+
+def flatten_markdown_tables(markdown):
+    lines = markdown.splitlines()
+    out = []
+    i = 0
+    while i < len(lines):
+        if (i + 1 < len(lines)
+            and "|" in lines[i]
+            and re.match(r"^\\s*\\|?\\s*:?-{3,}", lines[i + 1])):
+            headers = split_pipe_row(lines[i])
+            i += 2
+            out.append("**Table data — " + " / ".join(headers) + "**")
+            while i < len(lines) and "|" in lines[i] and lines[i].strip():
+                values = split_pipe_row(lines[i])
+                pairs = []
+                for j, value in enumerate(values):
+                    if value and j < len(headers):
+                        pairs.append(headers[j] + ": " + value)
+                if pairs:
+                    out.append("- " + "; ".join(pairs))
+                i += 1
+            out.append("")
+        else:
+            out.append(lines[i])
+            i += 1
+    return "\\n".join(out)
+
+text = flatten_markdown_tables(text)
 tmp = outdir / "body.md"
 tmp.write_text(text, encoding="utf-8")
 body = subprocess.check_output([
-    "pandoc", str(tmp), "--from=markdown+pipe_tables+tex_math_dollars",
+    "pandoc", str(tmp), "--from=markdown+tex_math_dollars",
     "--to=latex", "--wrap=none", "--resource-path=."
 ], text=True, cwd=Path.cwd())
 body = body.replace(r"\includegraphics{../figures/mars_nlp_pipeline.png}",
