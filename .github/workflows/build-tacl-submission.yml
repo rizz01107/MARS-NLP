@@ -32,6 +32,7 @@ jobs:
           cd submission/build
           pdflatex -interaction=nonstopmode -halt-on-error main.tex
           pdflatex -interaction=nonstopmode -halt-on-error main.tex
+          mv main.pdf MARS_NLP_TACL_Anonymous.pdf
       - name: Verify PDF and anonymity
         run: |
           test -s submission/build/MARS_NLP_TACL_Anonymous.pdf
