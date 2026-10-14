@@ -117,7 +117,7 @@ def test_final_tables_match_owner_table_and_saved_baselines():
     assert "best-performing transformer" in fin.loc["XLM-R", "Role"]
 
 
-def test_error_counts_per_model_not_aggregated():
+@pytest.mark.skipif(not (C.RESULTS_DIR / "error_analysis.csv").exists(),\n                    reason="error_analysis.csv is generated locally and excluded because it contains third-party message text")\ndef test_error_counts_per_model_not_aggregated():
     from src import final_tables as F
 
     ec = F.error_counts_df().set_index("Model_ID")["Errors"].astype(int).to_dict()
