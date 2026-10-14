@@ -209,7 +209,9 @@ CHECKLIST_ITEMS = [
 OPEN_ITEMS = ["Raw Colab transformer artifacts (mBERT, XLM-R) were unavailable in the final local workspace: the 3 PENDING local QA checks (missing raw mBERT artifacts, missing raw XLM-R artifacts, no-N/A verification for executed transformer runs) stay PENDING - not failures - until the artifacts are supplied. Copy the Colab raw files (`experiments/results/transformer_*`, `predictions/transformer_predictions_*.csv`, logs) into the repository and run `python -m src.qa_check` so the transformer values are recomputed locally (currently owner-verified summary only).",
               "Confirm the Zenodo dataset license (unverified) and the UCI CC BY 4.0 statement against the live records before redistributing any data.",
               "Regenerate the PDF after manuscript source changes and compare it against the Markdown manuscript.",
-              "Regenerate RELEASE_MANIFEST.md and the release archive after final edits so file hashes and archive contents match the current repository.",\n              "Proofread the generated report text; adapt formatting to the target venue.",\n              "Check the target journal’s AI-use disclosure policy and adjust wording before submission.",
+              "Regenerate RELEASE_MANIFEST.md and the release archive after final edits so file hashes and archive contents match the current repository.",
+              "Proofread the generated report text; adapt formatting to the target venue.",
+              "Check the target journal’s AI-use disclosure policy and adjust wording before submission.",
               "Optional: multi-seed transformer runs and per-language transformer subsets (needs raw files / new GPU runs)."]
 
 
