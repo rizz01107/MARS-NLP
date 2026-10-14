@@ -199,7 +199,7 @@ CHECKLIST_ITEMS = [
     ("Experimental setup", True, "manuscript section 4; `experiments/configs/`"), ("Results", True, "manuscript section 5; `results/FINAL_RESULTS.csv`"),
     ("Robustness analysis", True, "manuscript section 5.4; `results/ROBUSTNESS_RESULTS.csv`"), ("Statistical analysis", True, "manuscript section 5.3; `results/STATISTICAL_COMPARISONS.csv`"),
     ("Error analysis", True, "manuscript section 5.5; `results/ERROR_COUNTS.csv` (per model, not aggregated)"), ("Limitations", True, "manuscript section 7 (all required limitations; checked by `qa_check`)"),
-    ("Conclusion", True, "manuscript section 9"), ("References", True, "manuscript section 10 (core: Devlin, Conneau, Pedregosa; all cited)"), ("Tables", True, "manuscript Tables 1-9; `results/*.csv`"),
+    ("Conclusion", True, "manuscript section 9"), ("AI-assisted tools disclosure", True, "manuscript section 10 and README disclose ChatGPT and Claude; author responsibility stated"), ("References", True, "manuscript section 11 (core: Devlin, Conneau, Pedregosa; all cited)"), ("Tables", True, "manuscript Tables 1-9; `results/*.csv`"),
     ("Figures", True, "`figures/` (300 dpi PNG + PDF), embedded as Figures 1-3 in the manuscript"), ("Reproducibility information", True, "manuscript section 8; `reports/FINAL_REPRODUCIBILITY_REPORT.md`; `docs/COLAB_GPU.md`; `data/README.md`"),
     ("Code", True, "`src/`, `tests/`, `app/`, `notebooks/`"), ("Requirements", True, "`requirements.txt`, `requirements-colab.txt`, `environment.yml`"), ("README", True, "professor-facing README with all required sections"),
     ("QA report", True, "`reports/QA_REPORT.md`: owner-verified Colab QA 47 PASS / 0 FAIL / 0 PENDING / 0 SKIP; local release-package QA 50 PASS / 0 FAIL / 3 PENDING / 0 SKIP"),
@@ -208,7 +208,7 @@ CHECKLIST_ITEMS = [
     ("PDF manuscript", True, "`reports/MARS_NLP_Final_Manuscript.pdf` (`scripts/build_manuscript_pdf.sh`)")]
 OPEN_ITEMS = ["Raw Colab transformer artifacts (mBERT, XLM-R) were unavailable in the final local workspace: the 3 PENDING local QA checks (missing raw mBERT artifacts, missing raw XLM-R artifacts, no-N/A verification for executed transformer runs) stay PENDING - not failures - until the artifacts are supplied. Copy the Colab raw files (`experiments/results/transformer_*`, `predictions/transformer_predictions_*.csv`, logs) into the repository and run `python -m src.qa_check` so the transformer values are recomputed locally (currently owner-verified summary only).",
               "Confirm the Zenodo dataset license (unverified) and the UCI CC BY 4.0 statement against the live records before redistributing any data.",
-              "Proofread the generated report text; adapt formatting to the target venue.",
+              "Regenerate the PDF after manuscript source changes and compare it against the Markdown manuscript.",\n              "Proofread the generated report text; adapt formatting to the target venue.",\n              "Check the target journal’s AI-use disclosure policy and adjust wording before submission.",
               "Optional: multi-seed transformer runs and per-language transformer subsets (needs raw files / new GPU runs)."]
 
 
