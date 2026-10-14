@@ -37,7 +37,7 @@ Checked items were verified from files or by `python -m src.qa_check`; evidence 
 | [x] | No contradictory metrics | `qa_check`: manuscript and results tables equal `results/*.csv` and the owner-verified table |
 | [x] | No unsupported claims | automated wording checks (no 'best overall', 'significantly outperforms' or leading-performance claim); the author must still proofread |
 | [x] | AI-assisted tools disclosure | Manuscript section 10 and README describe use of ChatGPT and Claude, with author responsibility stated. |
-| [x] | PDF manuscript | `reports/MARS_NLP_Final_Manuscript.pdf` (`scripts/build_manuscript_pdf.sh`) |
+| [ ] | PDF manuscript synchronized with current Markdown | PDF must be regenerated after the AI-use disclosure and section numbering changes (`scripts/build_manuscript_pdf.sh`). |
 
 ## Verification status of the transformer results
 
