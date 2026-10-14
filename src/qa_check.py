@@ -377,7 +377,7 @@ def check_final_package() -> None:
 
 MS_SECTIONS = ["Abstract", "Keywords", "1. Introduction", "2. Related Work", "3. Methodology", "3.1 Dataset", "3.2 Data Splitting", "3.3 Synthetic Perturbations", "3.4 Character-Level TF-IDF",
                "3.5 Word-Level TF-IDF", "3.6 Classical Machine-Learning Models", "3.7 mBERT", "3.8 XLM-R", "4. Experimental Setup", "5. Results", "5.1 Main Model Comparison", "5.2 Transformer Results",
-               "5.3 Statistical Comparison", "5.4 Robustness Evaluation", "5.5 Error Analysis", "6. Discussion", "7. Limitations", "8. Reproducibility", "9. Conclusion", "10. References"]
+               "5.3 Statistical Comparison", "5.4 Robustness Evaluation", "5.5 Error Analysis", "6. Discussion", "7. Limitations", "8. Reproducibility", "9. Conclusion", "10. AI-Assisted Tools Disclosure", "11. References"]
 
 
 def check_manuscript() -> None:
@@ -395,7 +395,7 @@ def check_manuscript() -> None:
     miss = [h for h in MS_SECTIONS if h not in heads]
     add("manuscript: all required sections present", "PASS" if not miss else "FAIL", str(miss), group="documentation")
     head_ok = all(x in t for x in (TITLE, "Muhammad Rizwan", "Independent Researcher", "rizwan01107@gmail.com"))
-    add("manuscript: title, author, affiliation, email", "PASS" if head_ok else "FAIL", group="documentation")
+    add("manuscript: title, author, affiliation, email", "PASS" if head_ok else "FAIL", group="documentation")\n    disclosure_ok = all(x in t for x in ("AI-Assisted Tools Disclosure", "ChatGPT (OpenAI)", "Claude (Anthropic)", "author takes responsibility"))\n    add("manuscript: transparent AI-tool disclosure and author responsibility", "PASS" if disclosure_ok else "FAIL", group="documentation")
     fin = pd.read_csv(root / "results/FINAL_RESULTS.csv", keep_default_na=False)
     miss_m = []
     for r in fin.itertuples():
@@ -433,7 +433,7 @@ def check_manuscript() -> None:
     bad = [w for w in ("state-of-the-art", "claude", "ai assistant", "cloud", "best overall model", "significantly outperform", "2661", "2154", "independently reproduced locally,", "stale")
            if w in low.replace("not been independently reproduced locally", "").replace("transformers: state-of-the-art natural language processing", "")]
     add("manuscript: no forbidden claims or tooling mentions (state-of-the-art, best overall, significant superiority, aggregated FN/FP)", "PASS" if not bad else "FAIL", str(bad), group="documentation")
-    body, refs = t.split("## 10. References")
+    body, refs = t.split("## 11. References")
     cited = {int(n) for grp in _re.findall(r"\[(\d+(?:, \d+)*)\]", body) for n in grp.split(", ")}
     listed = {int(n) for n in _re.findall(r"^(\d+)\. ", refs, flags=_re.M)}
     core = all(k in refs for k in ("Devlin", "Conneau", "Pedregosa"))
