@@ -1,0 +1,50 @@
+name: Build TACL submission PDF
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "submission/tacl_submission.md"
+      - ".github/workflows/build-tacl-submission.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Pandoc and LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+      - name: Build anonymized PDF
+        run: |
+          mkdir -p submission/build
+          pandoc submission/tacl_submission.md \
+            --from markdown+pipe_tables+tex_math_dollars \
+            --template https://raw.githubusercontent.com/acl-org/acl-style-files/master/latex/acl_latex.tex \
+            -V documentclass=article \
+            -V fontsize=11pt \
+            -V geometry:a4paper \
+            -V geometry:margin=1in \
+            -V anonymous=true \
+            -V natbib=true \
+            --pdf-engine=pdflatex \
+            -o submission/build/MARS_NLP_TACL_Anonymous.pdf
+      - name: Verify PDF exists and no author identifiers
+        run: |
+          test -s submission/build/MARS_NLP_TACL_Anonymous.pdf
+          pdfinfo submission/build/MARS_NLP_TACL_Anonymous.pdf | grep -E "Pages:|Page size:"
+          pdftotext submission/build/MARS_NLP_TACL_Anonymous.pdf submission/build/paper.txt
+          if grep -Eiq 'Muhammad Rizwan|rizwan01107@gmail.com' submission/build/paper.txt; then
+            echo "Author identifier leaked into anonymized PDF"
+            exit 1
+          fi
+      - name: Upload PDF
+        uses: actions/upload-artifact@v4
+        with:
+          name: MARS-NLP-TACL-Anonymous-PDF
+          path: submission/build/MARS_NLP_TACL_Anonymous.pdf
+          if-no-files-found: error
