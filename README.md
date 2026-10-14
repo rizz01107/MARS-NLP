@@ -115,6 +115,7 @@ Details: `reports/QA_REPORT.md`.
 * Computational measurements depend on the Tesla T4 / software environment.
 * Transformer interpretability methods such as SHAP/Integrated Gradients were not performed.
 * Source, language and label semantics are confounded; language labels are heuristic; the Zenodo license is unverified.
+* AI-assisted workflow: ChatGPT and Claude supported parts of coding, debugging, code review, and manuscript editing. AI tools can introduce errors and were not treated as independent validators; the author implemented parts of the work hands-on, ran/reviewed experiments, and remains responsible for the final research.
 
 ## Project structure
 ```
