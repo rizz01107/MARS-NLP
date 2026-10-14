@@ -56,6 +56,7 @@ These three local checks are PENDING because the raw Colab artifacts are missing
 - [ ] Raw Colab transformer artifacts (mBERT, XLM-R) were unavailable in the final local workspace: the 3 PENDING local QA checks (missing raw mBERT artifacts, missing raw XLM-R artifacts, no-N/A verification for executed transformer runs) stay PENDING - not failures - until the artifacts are supplied. Copy the Colab raw files (`experiments/results/transformer_*`, `predictions/transformer_predictions_*.csv`, logs) into the repository and run `python -m src.qa_check` so the transformer values are recomputed locally (currently owner-verified summary only).
 - [ ] Confirm the Zenodo dataset license (unverified) and the UCI CC BY 4.0 statement against the live records before redistributing any data.
 - [ ] Regenerate the PDF after the manuscript disclosure/source changes; then compare it against the Markdown manuscript.
+- [ ] Regenerate `RELEASE_MANIFEST.md` and the release archive after all final edits so file hashes, file lists, and archive contents match the current repository.
 - [ ] Proofread the generated report text; adapt formatting to the target venue.
 - [ ] Check the target journal's AI-use disclosure policy and adjust the disclosure to its required wording before submission.
 - [ ] Optional: multi-seed transformer runs and per-language transformer subsets (needs raw files / new GPU runs).
