@@ -31,6 +31,14 @@ body = subprocess.check_output([
 ], text=True, cwd=Path.cwd())
 body = body.replace(r"\includegraphics{../figures/mars_nlp_pipeline.png}",
                     r"\includegraphics[width=0.9\linewidth]{../../figures/mars_nlp_pipeline.png}")
+# TACL uses a two-column layout; Pandoc's default longtable is incompatible.
+# Convert generated longtable blocks to regular floating table/tabular blocks.
+body = re.sub(r"\\\\begin\{longtable\}(?:\[[^\]]*\])?\{([^}]*)\}", r"\\\\begin{table}[t]\\\\centering\\\\small\\\\begin{tabular}{\1}", body)
+body = body.replace(r"\\\\endhead", "")
+body = body.replace(r"\\\\endfirsthead", "")
+body = body.replace(r"\\\\endfoot", "")
+body = body.replace(r"\\\\endlastfoot", "")
+body = body.replace(r"\\\\end{longtable}", r"\\\\end{tabular}\\\\end{table}")
 # Remove accidental Markdown-only raw links around the pipeline if pandoc emits paths differently.
 (outdir / "body.tex").write_text(body, encoding="utf-8")
 
