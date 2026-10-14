@@ -1,0 +1,60 @@
+{
+  "environment": {
+    "python": "3.13.15",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "cpu_count": 2,
+    "numpy": "2.1.3",
+    "scikit_learn": "1.6.1",
+    "torch": "2.11.0+cu130",
+    "cuda_available": true,
+    "cuda_version": "13.0",
+    "gpu_name": "Tesla T4",
+    "gpu_memory_gb": 14.56,
+    "cudnn_version": 92700,
+    "transformers": "5.18.0"
+  },
+  "checks": [
+    {
+      "check": "torch installed",
+      "status": "PASS",
+      "detail": "2.11.0+cu130"
+    },
+    {
+      "check": "transformers installed",
+      "status": "PASS",
+      "detail": "5.18.0"
+    },
+    {
+      "check": "CUDA GPU available",
+      "status": "PASS",
+      "detail": "Tesla T4 | CUDA 13.0 | 14.56 GB"
+    },
+    {
+      "check": "scikit-learn version equals the one the saved baselines were pickled with",
+      "status": "FAIL",
+      "detail": "installed 1.6.1 / required 1.8.0  ->  pip install -q scikit-learn==1.8.0  (then restart the runtime)"
+    },
+    {
+      "check": "disk space >= 8 GB",
+      "status": "PASS",
+      "detail": "70.2 GB free"
+    },
+    {
+      "check": "data integrity",
+      "status": "FAIL",
+      "detail": "FileNotFoundError: [Errno 2] No such file or directory: '/content/MARS-NLP/data/processed/mars_nlp_processed.sha256'"
+    },
+    {
+      "check": "hub access + tokenizer: bert-base-multilingual-cased",
+      "status": "PASS",
+      "detail": "vocab=119547"
+    },
+    {
+      "check": "hub access + tokenizer: xlm-roberta-base",
+      "status": "PASS",
+      "detail": "vocab=250002"
+    }
+  ],
+  "all_blocking_passed": false
+}

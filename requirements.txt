@@ -1,0 +1,25 @@
+# Core (CPU-only baselines, data pipeline, tests, demo). Versions are the ones the project was TESTED with
+# (Python 3.12); compatible ranges are given so Colab / other environments work.
+numpy>=1.26,<3
+pandas>=2.2,<4
+scipy>=1.11,<2
+scikit-learn>=1.4,<2
+joblib>=1.3
+openpyxl>=3.1
+pyyaml>=6.0
+matplotlib>=3.8,<4
+seaborn>=0.13
+tabulate>=0.9
+lime>=0.2.0.1
+streamlit>=1.50
+pytest>=8.0
+nbformat>=5.9
+nbconvert>=7.0
+ipykernel>=6.25
+
+# Transformer fine-tuning (GPU recommended; NOT needed for baselines/tests/demo of baselines).
+# Tested-with versions are unknown because torch could not be installed in the development sandbox.
+torch>=2.1
+transformers>=4.40
+sentencepiece>=0.1.99
+tokenizers>=0.15

@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+*.egg-info/
+
+# Data: do not redistribute third-party corpora (Zenodo license unverified); rebuild with `python -m src.build_dataset`
+data/raw/uci/
+data/raw/zenodo/
+data/processed/*
+!data/processed/*.sha256
+!data/processed/split_fingerprint.json
+!data/processed/.gitkeep
+
+# Models / checkpoints (rebuild with train scripts; HF checkpoints are hundreds of MB)
+models/*
+!models/.gitkeep
+*.pt
+*.bin
+*.safetensors
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# Files that contain dataset message text (third-party data; Zenodo license unverified) - regenerate with the pipeline
+experiments/results/error_analysis.csv
+reports/tables/explain_examples.csv
+
+# Local archives / backups
+*.tar.gz
+MARS-NLP-release.zip
+.manuscript_tmp.html

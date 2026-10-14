@@ -1,0 +1,6 @@
+{
+  "n_splits": 5,
+  "splitter": "StratifiedGroupKFold(shuffle=True)",
+  "seed": 42,
+  "hyperparameters": "best_param from main-split validation selection (not re-tuned inside folds)"
+}

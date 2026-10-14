@@ -1,0 +1,469 @@
+{
+  "environment": {
+    "python": "3.13.15",
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "cpu_count": 2,
+    "numpy": "2.1.3",
+    "scikit_learn": "1.8.0",
+    "torch": "2.11.0+cu130",
+    "cuda_available": true,
+    "cuda_version": "13.0",
+    "gpu_name": "Tesla T4",
+    "gpu_memory_gb": 14.56,
+    "cudnn_version": 92700,
+    "transformers": "5.18.0"
+  },
+  "models": {
+    "word_lr": {
+      "name": "TFIDF-word + LogisticRegression",
+      "model_id": "word_lr",
+      "features": "word",
+      "model": "LogisticRegression",
+      "augmented_training": false,
+      "best_param": 10.0,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "probability",
+      "grid": [
+        {
+          "C": 0.1,
+          "val_macro_f1": 0.8821195515997953,
+          "fit_seconds": 0.02204592300040531
+        },
+        {
+          "C": 1.0,
+          "val_macro_f1": 0.9326055147623789,
+          "fit_seconds": 0.02429908700105443
+        },
+        {
+          "C": 10.0,
+          "val_macro_f1": 0.9426567804180812,
+          "fit_seconds": 0.03729773500162992
+        },
+        {
+          "C": 100.0,
+          "val_macro_f1": 0.9404418763507687,
+          "fit_seconds": 0.042016153000076883
+        }
+      ],
+      "n_train": 4308
+    },
+    "word_svm": {
+      "name": "TFIDF-word + LinearSVM",
+      "model_id": "word_svm",
+      "features": "word",
+      "model": "LinearSVM",
+      "augmented_training": false,
+      "best_param": 0.1,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "margin_sigmoid",
+      "grid": [
+        {
+          "C": 0.01,
+          "val_macro_f1": 0.8781433774260173,
+          "fit_seconds": 0.007959791000757832
+        },
+        {
+          "C": 0.1,
+          "val_macro_f1": 0.9404418763507687,
+          "fit_seconds": 0.010186732999500236
+        },
+        {
+          "C": 1.0,
+          "val_macro_f1": 0.9404418763507687,
+          "fit_seconds": 0.021871801000088453
+        },
+        {
+          "C": 10.0,
+          "val_macro_f1": 0.9363344195473735,
+          "fit_seconds": 0.09731815600025584
+        }
+      ],
+      "n_train": 4308
+    },
+    "word_nb": {
+      "name": "TFIDF-word + NaiveBayes",
+      "model_id": "word_nb",
+      "features": "word",
+      "model": "NaiveBayes",
+      "augmented_training": false,
+      "best_param": 0.01,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "probability",
+      "grid": [
+        {
+          "alpha": 0.01,
+          "val_macro_f1": 0.9176387601891831,
+          "fit_seconds": 0.0023167110011854675
+        },
+        {
+          "alpha": 0.1,
+          "val_macro_f1": 0.9046464003395406,
+          "fit_seconds": 0.0023226739995152457
+        },
+        {
+          "alpha": 0.5,
+          "val_macro_f1": 0.8655855231597462,
+          "fit_seconds": 0.002062293999188114
+        },
+        {
+          "alpha": 1.0,
+          "val_macro_f1": 0.8372483260150514,
+          "fit_seconds": 0.002312912998604588
+        }
+      ],
+      "n_train": 4308
+    },
+    "char_lr": {
+      "name": "TFIDF-char + LogisticRegression",
+      "model_id": "char_lr",
+      "features": "char",
+      "model": "LogisticRegression",
+      "augmented_training": false,
+      "best_param": 100.0,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "probability",
+      "grid": [
+        {
+          "C": 0.1,
+          "val_macro_f1": 0.8857750293991593,
+          "fit_seconds": 0.1653366789996653
+        },
+        {
+          "C": 1.0,
+          "val_macro_f1": 0.9137590520079,
+          "fit_seconds": 0.1584944780006481
+        },
+        {
+          "C": 10.0,
+          "val_macro_f1": 0.9473407544836117,
+          "fit_seconds": 0.4424676199996611
+        },
+        {
+          "C": 100.0,
+          "val_macro_f1": 0.9489435717896809,
+          "fit_seconds": 0.9254341199994087
+        }
+      ],
+      "n_train": 4308
+    },
+    "char_svm": {
+      "name": "TFIDF-char + LinearSVM",
+      "model_id": "char_svm",
+      "features": "char",
+      "model": "LinearSVM",
+      "augmented_training": false,
+      "best_param": 0.1,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "margin_sigmoid",
+      "grid": [
+        {
+          "C": 0.01,
+          "val_macro_f1": 0.8839850325402867,
+          "fit_seconds": 0.03137539900126285
+        },
+        {
+          "C": 0.1,
+          "val_macro_f1": 0.9551951743865821,
+          "fit_seconds": 0.04519688699838298
+        },
+        {
+          "C": 1.0,
+          "val_macro_f1": 0.9467527246739325,
+          "fit_seconds": 0.08523910100120702
+        },
+        {
+          "C": 10.0,
+          "val_macro_f1": 0.9486567899575593,
+          "fit_seconds": 0.19579966899982537
+        }
+      ],
+      "n_train": 4308
+    },
+    "char_nb": {
+      "name": "TFIDF-char + NaiveBayes",
+      "model_id": "char_nb",
+      "features": "char",
+      "model": "NaiveBayes",
+      "augmented_training": false,
+      "best_param": 0.01,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "probability",
+      "grid": [
+        {
+          "alpha": 0.01,
+          "val_macro_f1": 0.9277121730493323,
+          "fit_seconds": 0.006536632999996073
+        },
+        {
+          "alpha": 0.1,
+          "val_macro_f1": 0.9091479524438573,
+          "fit_seconds": 0.008424153998930706
+        },
+        {
+          "alpha": 0.5,
+          "val_macro_f1": 0.855833153658186,
+          "fit_seconds": 0.00603066899930127
+        },
+        {
+          "alpha": 1.0,
+          "val_macro_f1": 0.8536201588689141,
+          "fit_seconds": 0.005655855000441079
+        }
+      ],
+      "n_train": 4308
+    },
+    "word_lr_aug": {
+      "name": "TFIDF-word + LogisticRegression (aug-trained)",
+      "model_id": "word_lr_aug",
+      "features": "word",
+      "model": "LogisticRegression",
+      "augmented_training": true,
+      "best_param": 100.0,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "probability",
+      "grid": [
+        {
+          "C": 0.1,
+          "val_macro_f1": 0.9097842452862471,
+          "fit_seconds": 0.24810816900026111
+        },
+        {
+          "C": 1.0,
+          "val_macro_f1": 0.9355428250096651,
+          "fit_seconds": 0.290043205000984
+        },
+        {
+          "C": 10.0,
+          "val_macro_f1": 0.9373861521348883,
+          "fit_seconds": 0.3823042580006586
+        },
+        {
+          "C": 100.0,
+          "val_macro_f1": 0.9392393320964749,
+          "fit_seconds": 0.5107907389992761
+        }
+      ],
+      "n_train": 40690
+    },
+    "word_svm_aug": {
+      "name": "TFIDF-word + LinearSVM (aug-trained)",
+      "model_id": "word_svm_aug",
+      "features": "word",
+      "model": "LinearSVM",
+      "augmented_training": true,
+      "best_param": 10.0,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "margin_sigmoid",
+      "grid": [
+        {
+          "C": 0.01,
+          "val_macro_f1": 0.9370405724752111,
+          "fit_seconds": 0.13767178800117108
+        },
+        {
+          "C": 0.1,
+          "val_macro_f1": 0.9392393320964749,
+          "fit_seconds": 0.09992287499881058
+        },
+        {
+          "C": 1.0,
+          "val_macro_f1": 0.9414257552229601,
+          "fit_seconds": 0.17601248900064093
+        },
+        {
+          "C": 10.0,
+          "val_macro_f1": 0.9432900432900433,
+          "fit_seconds": 0.4575421089994052
+        }
+      ],
+      "n_train": 40690
+    },
+    "word_nb_aug": {
+      "name": "TFIDF-word + NaiveBayes (aug-trained)",
+      "model_id": "word_nb_aug",
+      "features": "word",
+      "model": "NaiveBayes",
+      "augmented_training": true,
+      "best_param": 0.01,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "probability",
+      "grid": [
+        {
+          "alpha": 0.01,
+          "val_macro_f1": 0.9597142656310407,
+          "fit_seconds": 0.01718328600145469
+        },
+        {
+          "alpha": 0.1,
+          "val_macro_f1": 0.957584167575247,
+          "fit_seconds": 0.016694129000825342
+        },
+        {
+          "alpha": 0.5,
+          "val_macro_f1": 0.9467527246739325,
+          "fit_seconds": 0.016539075999389752
+        },
+        {
+          "alpha": 1.0,
+          "val_macro_f1": 0.9236836751678349,
+          "fit_seconds": 0.016498521999892546
+        }
+      ],
+      "n_train": 40690
+    },
+    "char_lr_aug": {
+      "name": "TFIDF-char + LogisticRegression (aug-trained)",
+      "model_id": "char_lr_aug",
+      "features": "char",
+      "model": "LogisticRegression",
+      "augmented_training": true,
+      "best_param": 10.0,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "probability",
+      "grid": [
+        {
+          "C": 0.1,
+          "val_macro_f1": 0.8912885291472488,
+          "fit_seconds": 2.0388805710008455
+        },
+        {
+          "C": 1.0,
+          "val_macro_f1": 0.9311775616764413,
+          "fit_seconds": 2.253013761001057
+        },
+        {
+          "C": 10.0,
+          "val_macro_f1": 0.9476285453203528,
+          "fit_seconds": 5.16374582699973
+        },
+        {
+          "C": 100.0,
+          "val_macro_f1": 0.9473407544836117,
+          "fit_seconds": 3.5278543860003992
+        }
+      ],
+      "n_train": 40690
+    },
+    "char_svm_aug": {
+      "name": "TFIDF-char + LinearSVM (aug-trained)",
+      "model_id": "char_svm_aug",
+      "features": "char",
+      "model": "LinearSVM",
+      "augmented_training": true,
+      "best_param": 0.1,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "margin_sigmoid",
+      "grid": [
+        {
+          "C": 0.01,
+          "val_macro_f1": 0.937726867460114,
+          "fit_seconds": 0.5847685530006856
+        },
+        {
+          "C": 0.1,
+          "val_macro_f1": 0.951122008421726,
+          "fit_seconds": 0.5170728239991149
+        },
+        {
+          "C": 1.0,
+          "val_macro_f1": 0.9470488424568697,
+          "fit_seconds": 0.7228630520003207
+        },
+        {
+          "C": 10.0,
+          "val_macro_f1": 0.9508486689297837,
+          "fit_seconds": 0.8870313030001853
+        }
+      ],
+      "n_train": 40690
+    },
+    "char_nb_aug": {
+      "name": "TFIDF-char + NaiveBayes (aug-trained)",
+      "model_id": "char_nb_aug",
+      "features": "char",
+      "model": "NaiveBayes",
+      "augmented_training": true,
+      "best_param": 0.1,
+      "label2id": {
+        "Legitimate": 0,
+        "Scam": 1
+      },
+      "seed": 42,
+      "confidence_type": "probability",
+      "grid": [
+        {
+          "alpha": 0.01,
+          "val_macro_f1": 0.9318429060179418,
+          "fit_seconds": 0.08590990499942563
+        },
+        {
+          "alpha": 0.1,
+          "val_macro_f1": 0.9516571187572489,
+          "fit_seconds": 0.08376122499976191
+        },
+        {
+          "alpha": 0.5,
+          "val_macro_f1": 0.9392393320964749,
+          "fit_seconds": 0.08778707900091831
+        },
+        {
+          "alpha": 1.0,
+          "val_macro_f1": 0.9031685802986251,
+          "fit_seconds": 0.08745284100041317
+        }
+      ],
+      "n_train": 40690
+    }
+  },
+  "split_sizes": {
+    "train_originals": 4308,
+    "train_with_variants": 40690,
+    "validation": 917,
+    "test": 935
+  }
+}

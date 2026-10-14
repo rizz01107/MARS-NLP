@@ -1,0 +1,277 @@
+{
+  "checks": [
+    {
+      "name": "required_columns",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "all present",
+      "count": 0
+    },
+    {
+      "name": "boolean_columns_valid",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 invalid boolean values",
+      "count": 0
+    },
+    {
+      "name": "no_missing_message_id",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 missing",
+      "count": 0
+    },
+    {
+      "name": "no_missing_message",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 missing",
+      "count": 0
+    },
+    {
+      "name": "no_missing_cleaned_message",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 missing",
+      "count": 0
+    },
+    {
+      "name": "no_missing_label",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 missing",
+      "count": 0
+    },
+    {
+      "name": "no_missing_language",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 missing",
+      "count": 0
+    },
+    {
+      "name": "no_missing_source_type",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 missing",
+      "count": 0
+    },
+    {
+      "name": "no_missing_split",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 missing",
+      "count": 0
+    },
+    {
+      "name": "no_missing_group_id",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 missing",
+      "count": 0
+    },
+    {
+      "name": "no_missing_source_dataset",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 missing",
+      "count": 0
+    },
+    {
+      "name": "no_missing_perturbation_type",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 missing",
+      "count": 0
+    },
+    {
+      "name": "perturbed_rows_have_original_message_id",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 perturbed rows without original_message_id",
+      "count": 0
+    },
+    {
+      "name": "originals_have_no_original_message_id",
+      "status": "PASS",
+      "severity": "WARNING",
+      "detail": "0 originals with original_message_id (each is its own source)",
+      "count": 0
+    },
+    {
+      "name": "unique_message_id",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 duplicated message_id",
+      "count": 0
+    },
+    {
+      "name": "allowed_labels",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "invalid: []",
+      "count": 0
+    },
+    {
+      "name": "allowed_languages",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "invalid: []",
+      "count": 0
+    },
+    {
+      "name": "allowed_source_type",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "invalid: []",
+      "count": 0
+    },
+    {
+      "name": "source_type_consistent_with_is_perturbed",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 inconsistent rows",
+      "count": 0
+    },
+    {
+      "name": "allowed_perturbation_type",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "invalid: []",
+      "count": 0
+    },
+    {
+      "name": "originals_have_perturbation_type_none",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 originals with a perturbation type",
+      "count": 0
+    },
+    {
+      "name": "allowed_split",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "invalid: []",
+      "count": 0
+    },
+    {
+      "name": "original_message_id_refers_to_original",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 variants point to a missing/non-original id",
+      "count": 0
+    },
+    {
+      "name": "variant_label_equals_original_label",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 variants with changed label",
+      "count": 0
+    },
+    {
+      "name": "variant_group_equals_original_group",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 mismatches",
+      "count": 0
+    },
+    {
+      "name": "variants_differ_from_original_text",
+      "status": "PASS",
+      "severity": "WARNING",
+      "detail": "0 identical to original",
+      "count": 0
+    },
+    {
+      "name": "no_duplicate_original_messages",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 duplicated original messages",
+      "count": 0
+    },
+    {
+      "name": "perturbed_texts_not_identical_to_other_originals",
+      "status": "PASS",
+      "severity": "WARNING",
+      "detail": "0 perturbed texts equal some original",
+      "count": 0
+    },
+    {
+      "name": "no_group_in_multiple_splits",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 groups, e.g. []",
+      "count": 0
+    },
+    {
+      "name": "variants_share_split_with_original",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 variants",
+      "count": 0
+    },
+    {
+      "name": "no_exact_text_overlap_between_splits",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "0 shared messages",
+      "count": 0
+    },
+    {
+      "name": "code_switched_flag_matches_language",
+      "status": "PASS",
+      "severity": "WARNING",
+      "detail": "0 mismatches",
+      "count": 0
+    },
+    {
+      "name": "split_train_has_both_classes",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "train: labels ['Legitimate', 'Scam']",
+      "count": 4308
+    },
+    {
+      "name": "split_validation_has_both_classes",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "validation: labels ['Legitimate', 'Scam']",
+      "count": 917
+    },
+    {
+      "name": "split_test_has_both_classes",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "detail": "test: labels ['Legitimate', 'Scam']",
+      "count": 935
+    },
+    {
+      "name": "residual_near_duplicate_similarity_test_vs_train",
+      "status": "INFO",
+      "severity": "CRITICAL",
+      "detail": "mean max-sim=0.329; share>=0.90: 0.000; share>=0.80: 0.000",
+      "count": 0
+    }
+  ],
+  "stats": {
+    "rows": 58191,
+    "originals": 6160,
+    "variants": 52031,
+    "residual_similarity_test_vs_train": {
+      "n": 935,
+      "mean_max_sim": 0.3289386527901665,
+      "p95_max_sim": 0.6748971223831175,
+      "share_ge_0.80": 0.0,
+      "share_ge_0.90": 0.0,
+      "share_ge_0.95": 0.0
+    },
+    "residual_similarity_validation_vs_train": {
+      "n": 917,
+      "mean_max_sim": 0.3257769336324742,
+      "p95_max_sim": 0.5834432363510126,
+      "share_ge_0.80": 0.0,
+      "share_ge_0.90": 0.0,
+      "share_ge_0.95": 0.0
+    }
+  }
+}

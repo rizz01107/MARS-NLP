@@ -1,0 +1,15 @@
+Model_ID,Model,Errors,False_Positives,False_Negatives,Source
+word_lr,TFIDF-word + LogisticRegression,291,156,135,experiments/results/error_analysis.csv
+word_svm,TFIDF-word + LinearSVM,177,40,137,experiments/results/error_analysis.csv
+word_nb,TFIDF-word + NaiveBayes,550,286,264,experiments/results/error_analysis.csv
+char_lr,TFIDF-char + LogisticRegression,141,10,131,experiments/results/error_analysis.csv
+char_svm,TFIDF-char + LinearSVM,142,9,133,experiments/results/error_analysis.csv
+char_nb,TFIDF-char + NaiveBayes,533,307,226,experiments/results/error_analysis.csv
+word_lr_aug,TFIDF-word + LogisticRegression (aug-trained),509,393,116,experiments/results/error_analysis.csv
+word_svm_aug,TFIDF-word + LinearSVM (aug-trained),511,400,111,experiments/results/error_analysis.csv
+word_nb_aug,TFIDF-word + NaiveBayes (aug-trained),359,140,219,experiments/results/error_analysis.csv
+char_lr_aug,TFIDF-char + LogisticRegression (aug-trained),159,29,130,experiments/results/error_analysis.csv
+char_svm_aug,TFIDF-char + LinearSVM (aug-trained),146,13,133,experiments/results/error_analysis.csv
+char_nb_aug,TFIDF-char + NaiveBayes (aug-trained),423,202,221,experiments/results/error_analysis.csv
+mbert,mBERT,614,n/a,n/a,results/verified_transformer_results.json (FP/FN split needs the raw predictions file)
+xlmr,XLM-R,264,n/a,n/a,results/verified_transformer_results.json (FP/FN split needs the raw predictions file)

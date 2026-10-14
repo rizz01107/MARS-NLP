@@ -1,0 +1,261 @@
+# MARS-NLP final reproducibility report
+
+# MARS-NLP: Robust Multilingual Scam Message Classification with Character-Level and Transformer-Based NLP
+
+**Author:** Muhammad Rizwan  
+**Affiliation:** Independent Researcher  
+**Email:** rizwan01107@gmail.com
+
+Generated 2026-10-13 21:10:27 by `python -m src.make_final_package` from saved results only (no training or dataset rebuild).
+
+## 1. Dataset
+
+* Original messages: **6,160** (UCI SMS Spam Collection + Zenodo Roman-Urdu phishing SMS, after exact-duplicate removal)
+* Synthetic perturbed variants: **52,031** (derived only from real originals; `source_type = augmented_from_real`)
+* No Urdu-script messages; no Urdu-script benchmark is available.
+
+## 2. Train / validation / test split
+
+* Originals: train **4,308**, validation **917**, test **935** (group-level 70/15/15, stratified by source and label, seed 42).
+* Test message groups: **778**. Test languages: English **782**; Roman Urdu + Mixed **149**, which come from only **5 independent test groups** and are a stated limitation (descriptive only).
+
+## 3. Perturbation types
+
+Spelling variation, character deletion, character substitution, word spacing variation, punctuation variation, casing variation, informal abbreviation, Roman Urdu spelling variation, code switching, minor noise.
+
+| Perturbation                  |   Variants |
+|:------------------------------|-----------:|
+| spelling_variation            |       6042 |
+| character_deletion            |       6148 |
+| character_substitution        |       6148 |
+| word_spacing_variation        |       6053 |
+| punctuation_variation         |       6147 |
+| casing_variation              |       6156 |
+| informal_abbreviation         |       4045 |
+| minor_noise                   |       5876 |
+| code_switching                |       4640 |
+| roman_urdu_spelling_variation |        776 |
+
+## 4. Data-leakage checks
+
+| Check                                            | Status   | Detail                                                     |
+|:-------------------------------------------------|:---------|:-----------------------------------------------------------|
+| no_missing_split                                 | PASS     | 0 missing                                                  |
+| no_missing_group_id                              | PASS     | 0 missing                                                  |
+| unique_message_id                                | PASS     | 0 duplicated message_id                                    |
+| allowed_split                                    | PASS     | invalid: []                                                |
+| variant_label_equals_original_label              | PASS     | 0 variants with changed label                              |
+| variant_group_equals_original_group              | PASS     | 0 mismatches                                               |
+| variants_differ_from_original_text               | PASS     | 0 identical to original                                    |
+| no_duplicate_original_messages                   | PASS     | 0 duplicated original messages                             |
+| no_group_in_multiple_splits                      | PASS     | 0 groups, e.g. []                                          |
+| variants_share_split_with_original               | PASS     | 0 variants                                                 |
+| no_exact_text_overlap_between_splits             | PASS     | 0 shared messages                                          |
+| split_train_has_both_classes                     | PASS     | train: labels ['Legitimate', 'Scam']                       |
+| split_validation_has_both_classes                | PASS     | validation: labels ['Legitimate', 'Scam']                  |
+| split_test_has_both_classes                      | PASS     | test: labels ['Legitimate', 'Scam']                        |
+| residual_near_duplicate_similarity_test_vs_train | INFO     | mean max-sim=0.329; share>=0.90: 0.000; share>=0.80: 0.000 |
+
+Residual similarity of test originals to their most similar training original (char 3-5-gram TF-IDF cosine): mean 0.329; share >= 0.80: 0.000; share >= 0.90: 0.000.
+
+## 5. Checksum verification
+
+* Expected SHA-256 (`data/processed/mars_nlp_processed.sha256`): `741146be0540eab95495770e5aa346b11640ed945c8935b58082156bab81fd9d`
+* Recomputed at generation time: `741146be0540eab95495770e5aa346b11640ed945c8935b58082156bab81fd9d` -> **MATCH**
+* Every transformer training run verifies this checksum before training and aborts on mismatch.
+
+## 6. Split fingerprints (SHA-256 of sorted original message ids per split)
+
+| Split      |    n | sha256                                                           |
+|:-----------|-----:|:-----------------------------------------------------------------|
+| train      | 4308 | cb20c5190816430980ec18ca47d08a63cf291b528dcf610533c9ee4d9a9f1a52 |
+| validation |  917 | f155bbf81741ff66c7ac54babf8bb8516471cdf90e2427aadc6fc4b8158cfa26 |
+| test       |  935 | 727092f30d113e42013629d6e6ac2bb1dde57d197284c5448ad059e88f86e611 |
+
+## 7. Model configurations
+
+**CPU baselines** (features: `word` = word 1-2-grams, `char` = char_wb 2-5-grams; TF-IDF sublinear, min_df=2, fit on the training split only; LR/SVM class_weight=balanced):
+
+| Model                           | Features   | Classifier         |   Best C/alpha | Class weight   | Selected on         |
+|:--------------------------------|:-----------|:-------------------|---------------:|:---------------|:--------------------|
+| TFIDF-word + LogisticRegression | word       | LogisticRegression |          10    | balanced       | validation macro-F1 |
+| TFIDF-word + LinearSVM          | word       | LinearSVM          |           0.1  | balanced       | validation macro-F1 |
+| TFIDF-word + NaiveBayes         | word       | NaiveBayes         |           0.01 | -              | validation macro-F1 |
+| TFIDF-char + LogisticRegression | char       | LogisticRegression |         100    | balanced       | validation macro-F1 |
+| TFIDF-char + LinearSVM          | char       | LinearSVM          |           0.1  | balanced       | validation macro-F1 |
+| TFIDF-char + NaiveBayes         | char       | NaiveBayes         |           0.01 | -              | validation macro-F1 |
+
+Grids: LR C in {0.1, 1, 10, 100}; SVM C in {0.01, 0.1, 1, 10}; NB alpha in {0.01, 0.1, 0.5, 1.0} (small grids; not exhaustive). The validation-selected baseline is **TFIDF-char + LinearSVM** (validation macro-F1 0.9552).
+
+**Transformers:** mBERT `bert-base-multilingual-cased`, XLM-R `xlm-roberta-base`; at most 4 epochs; early stopping on validation macro-F1, patience 2; batch size 32 (OOM fallback: batch size 16 (must be recorded explicitly)); documented-command defaults lr 2e-05, max length 128, weight decay 0.01, warm-up 0.1, seed 42, class-weighted cross-entropy, AdamW, linear warm-up/decay.
+
+## 8. Final metrics (test, 935 original messages; Precision/Recall = Scam class)
+
+| Model                             |   Accuracy |   Precision |   Recall |   Macro_F1 |   Weighted_F1 | Macro_F1_CI95   | Hardware        |
+|:----------------------------------|-----------:|------------:|---------:|-----------:|--------------:|:----------------|:----------------|
+| Char TF-IDF + Logistic Regression |     0.9872 |      0.9931 |   0.9290 |     0.9762 |        0.9870 | [0.952, 0.990]  | CPU (1 core)    |
+| Char TF-IDF + Linear SVM          |     0.9861 |      0.9931 |   0.9226 |     0.9741 |        0.9859 | [0.949, 0.988]  | CPU (1 core)    |
+| Word TF-IDF + Logistic Regression |     0.9690 |      0.8938 |   0.9226 |     0.9446 |        0.9692 | [0.857, 0.987]  | CPU (1 core)    |
+| Word TF-IDF + Linear SVM          |     0.9861 |      0.9931 |   0.9226 |     0.9741 |        0.9859 | [0.948, 0.989]  | CPU (1 core)    |
+| Word TF-IDF + Naive Bayes         |     0.9369 |      0.7927 |   0.8387 |     0.8885 |        0.9376 | [0.750, 0.967]  | CPU (1 core)    |
+| Char TF-IDF + Naive Bayes         |     0.9283 |      0.7500 |   0.8516 |     0.8770 |        0.9301 | [0.718, 0.967]  | CPU (1 core)    |
+| mBERT                             |     0.9369 |      0.8750 |   0.7226 |     0.8772 |        0.9344 | [0.754, 0.970]  | NVIDIA Tesla T4 |
+| XLM-R                             |     0.9850 |      0.9862 |   0.9226 |     0.9722 |        0.9848 | [0.946, 0.987]  | NVIDIA Tesla T4 |
+
+* **Char TF-IDF + Logistic Regression achieved the highest observed test macro-F1 (0.9762).**
+* **Char TF-IDF + Linear SVM was the validation-selected CPU baseline and achieved 0.9741 test macro-F1.**
+* **XLM-R was the best-performing transformer with 0.9722 macro-F1.** XLM-R is not claimed to be the best overall model, nor to significantly outperform the selected SVM.
+
+## 9. Transformer training details and GPU information
+
+| Model                                |   Train n | GPU             |   Best epoch |   Train time (s) |    Params |   Size (MB) |   GPU ms/msg |   CPU ms/msg |
+|:-------------------------------------|----------:|:----------------|-------------:|-----------------:|----------:|------------:|-------------:|-------------:|
+| mBERT (bert-base-multilingual-cased) |      4308 | NVIDIA Tesla T4 |            2 |            287.5 | 177854978 |       681.3 |         9.52 |        125.7 |
+| XLM-RoBERTa (xlm-roberta-base)       |      4308 | NVIDIA Tesla T4 |            4 |            295.6 | 278045186 |      1077   |        10.25 |        117.5 |
+
+* GPU: **NVIDIA Tesla T4** (Google Colab) for both models. CUDA / PyTorch / transformers versions are recorded in the raw run JSON (`environment`), which is not in this snapshot and is therefore not restated.
+* Provenance of these values: `results/verified_transformer_results.json` (owner-verified Colab T4 run (raw files not in this snapshot)).
+
+## 10. Inference benchmarks (computational benchmarks, not edge-device measurements)
+
+CPU baselines (one CPU core, sandbox machine):
+
+| Model                             |   Params (classifier weights) |   Size (MB) |   Train (s) |   CPU single-msg mean (ms) |
+|:----------------------------------|------------------------------:|------------:|------------:|---------------------------:|
+| Char TF-IDF + Logistic Regression |                         32073 |      0.4357 |      2.128  |                     1.213  |
+| Char TF-IDF + Linear SVM          |                         32073 |      0.4345 |      0.7712 |                     0.8428 |
+| Word TF-IDF + Logistic Regression |                         10275 |      0.1534 |      0.1834 |                     0.5752 |
+| Word TF-IDF + Linear SVM          |                         10275 |      0.1524 |      0.1444 |                     0.6082 |
+| Word TF-IDF + Naive Bayes         |                         20550 |      0.2483 |      0.1406 |                     0.7567 |
+| Char TF-IDF + Naive Bayes         |                         64146 |      0.787  |      0.6979 |                     1.236  |
+
+Transformers (single-message latency on the Colab Tesla T4 and on the Colab CPU) are in the table of Section 9. Measurements depend on the hardware/software environment.
+
+## 11. Robustness results
+
+`degradation = original macro-F1 - perturbed macro-F1` (mean over 10 synthetic perturbation types, paired test messages; lower is better). Robustness to the project's synthetic perturbation suite - not real-world adversarial robustness.
+
+| Model                             |   Degradation |
+|:----------------------------------|--------------:|
+| Char TF-IDF + Logistic Regression |        0.0064 |
+| Char TF-IDF + Linear SVM          |        0.0029 |
+| Word TF-IDF + Logistic Regression |       -0.0043 |
+| Word TF-IDF + Linear SVM          |        0.0126 |
+| Word TF-IDF + Naive Bayes         |       -0.0141 |
+| Char TF-IDF + Naive Bayes         |       -0.0356 |
+| mBERT                             |       -0.0055 |
+| XLM-R                             |        0.0339 |
+
+Per-type values for the selected Char SVM (paired; cluster-bootstrap 95% CI):
+
+| Perturbation_Type             |   Degradation |   CI95_low |   CI95_high |   n_pairs |   n_groups |
+|:------------------------------|--------------:|-----------:|------------:|----------:|-----------:|
+| spelling_variation            |        0.0021 |     0.0000 |      0.0079 |       913 |        757 |
+| character_deletion            |        0.0041 |    -0.0079 |      0.0143 |       935 |        778 |
+| character_substitution        |        0.0145 |     0.0053 |      0.0298 |       935 |        778 |
+| word_spacing_variation        |        0.0042 |     0.0000 |      0.0125 |       923 |        767 |
+| punctuation_variation         |        0.0022 |    -0.0070 |      0.0126 |       932 |        775 |
+| casing_variation              |        0.0000 |     0.0000 |      0.0000 |       935 |        778 |
+| informal_abbreviation         |        0.0000 |    -0.0080 |      0.0079 |       632 |        527 |
+| roman_urdu_spelling_variation |        0.0000 |     0.0000 |      0.0000 |       137 |          5 |
+| code_switching                |        0.0022 |    -0.0060 |      0.0121 |       700 |        568 |
+| minor_noise                   |        0.0002 |    -0.0061 |      0.0074 |       901 |        744 |
+
+Per-type values for the transformers require the raw robustness CSVs (not in this snapshot).
+
+## 12. Statistical comparisons (paired cluster bootstrap over near-duplicate test groups)
+
+| Comparison                                                          |   Difference_A_minus_B |   CI95_low |   CI95_high | CI_includes_zero   |
+|:--------------------------------------------------------------------|-----------------------:|-----------:|------------:|:-------------------|
+| XLM-R vs selected Char TF-IDF + Linear SVM (overall test, macro-F1) |              -0.001915 |  -0.018834 |    0.013255 | True               |
+| XLM-R vs mBERT (overall test, macro-F1)                             |               0.095037 |   0.001722 |    0.223619 | False              |
+| XLM-R vs mBERT (English-only test, macro-F1)                        |               0.008583 |  -0.006933 |    0.025362 | True               |
+
+* XLM-R vs the selected Char SVM: CI includes zero -> no claim of superiority.
+* XLM-R vs mBERT: CI excludes zero (lower bound 0.0017, close to zero).
+* English-only XLM-R vs mBERT: CI includes zero -> no claim of English-only superiority.
+
+## 13. Error analysis (counts per model over test originals + variants; never aggregated across models)
+
+| Model                                         |   Errors | False_Positives   | False_Negatives   |
+|:----------------------------------------------|---------:|:------------------|:------------------|
+| TFIDF-word + LogisticRegression               |      291 | 156               | 135               |
+| TFIDF-word + LinearSVM                        |      177 | 40                | 137               |
+| TFIDF-word + NaiveBayes                       |      550 | 286               | 264               |
+| TFIDF-char + LogisticRegression               |      141 | 10                | 131               |
+| TFIDF-char + LinearSVM                        |      142 | 9                 | 133               |
+| TFIDF-char + NaiveBayes                       |      533 | 307               | 226               |
+| TFIDF-word + LogisticRegression (aug-trained) |      509 | 393               | 116               |
+| TFIDF-word + LinearSVM (aug-trained)          |      511 | 400               | 111               |
+| TFIDF-word + NaiveBayes (aug-trained)         |      359 | 140               | 219               |
+| TFIDF-char + LogisticRegression (aug-trained) |      159 | 29                | 130               |
+| TFIDF-char + LinearSVM (aug-trained)          |      146 | 13                | 133               |
+| TFIDF-char + NaiveBayes (aug-trained)         |      423 | 202               | 221               |
+| mBERT                                         |      614 | n/a               | n/a               |
+| XLM-R                                         |      264 | n/a               | n/a               |
+
+## 14. QA results
+
+* Owner-verified (Colab): **47 PASS, 0 FAIL, 0 PENDING, 0 SKIP**; 63 pytest tests passed.
+  * no group overlap across splits
+  * variants remain in their original split
+  * zero exact cross-split text overlap
+  * processed CSV checksum verified
+  * split fingerprints unchanged
+  * mBERT trained/evaluated
+  * XLM-R trained/evaluated
+  * both transformers ran on Tesla T4
+  * metrics recomputed from raw predictions (70 metric values checked)
+  * robustness metrics traced
+  * prediction smoke tests passed
+  * Streamlit AppTest passed
+  * headless application startup passed
+* Snapshot-local QA of the release package: **50 PASS, 0 FAIL, 3 PENDING, 0 SKIP**. See `reports/QA_REPORT.md`.
+
+The 3 PENDING local checks:
+
+| # | Local QA check | Status | Meaning |
+|---|---|---|---|
+| 1 | `transformer mbert: raw result files` | PENDING | missing raw mBERT artifacts (`transformer_mbert.json`, predictions, subsets, robustness CSV, checkpoint) |
+| 2 | `transformer xlmr: raw result files` | PENDING | missing raw XLM-R artifacts (`transformer_xlmr.json`, predictions, subsets, robustness CSV, checkpoint) |
+| 3 | `transformers: no-N/A check on raw executed runs` | PENDING | no-N/A verification for executed transformer runs: it can only run on the raw run files |
+
+These three local checks are PENDING because the raw Colab artifacts are missing; **they are not failures** (0 local checks failed) and are not converted to PASS without actual raw evidence.
+
+**Reproducibility note (transformers).** mBERT and XLM-R were executed and verified in the original Google Colab GPU run (NVIDIA Tesla T4), which passed the owner's Colab QA (47 PASS, 0 FAIL, 0 PENDING, 0 SKIP). Their final metrics are retained as owner-verified results. The raw transformer artifacts from that run (run JSON, prediction and robustness files, checkpoints, environment information) were unavailable in the final local workspace, so these values have not been independently reproduced or re-verified locally, and complete raw-artifact reproducibility is not claimed for mBERT and XLM-R. No results were reconstructed or invented. This limitation does not change the reported verified metrics.
+
+## 15. Known limitations
+
+* The dataset is domain-specific (English SMS marketing spam; Pakistani bank/utility-style Roman-Urdu phishing templates).
+* The perturbations are synthetic and are not equivalent to naturally occurring adversarial messages.
+* Roman Urdu/Mixed evidence is limited: only **5 independent test groups** support that analysis (descriptive only).
+* There is no comprehensive Urdu-script benchmark.
+* Multi-seed variance was not estimated for every model (each transformer was trained once).
+* The hyper-parameter search was not exhaustive.
+* Computational measurements depend on the Tesla T4 and the software environment.
+* Transformer interpretability methods such as SHAP/Integrated Gradients were not performed.
+* Language labels are heuristic; source, language and label semantics are confounded; the Zenodo license is unverified.
+* The mBERT and XLM-R metrics are owner-verified results of the original Colab run; the raw transformer artifacts were unavailable locally, so they have not been independently reproduced here (3 local QA checks PENDING, not failed).
+
+## 16. Exact source files for each result
+
+| Result                                                                  | Source file(s)                                                                                                                                                | Verification in this snapshot                                           |
+|:------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------|
+| Dataset sizes, split sizes, perturbation counts                         | `reports/tables/build_summary.json`; recomputed from `data/processed/mars_nlp_processed.csv` by `qa_check`                                                    | recomputed                                                              |
+| Test groups (778), English 782, Roman Urdu + Mixed 149 / 5 groups       | `data/processed/mars_nlp_processed.csv`; `reports/tables/eda_group_structure.csv`                                                                             | recomputed                                                              |
+| Leakage checks, residual similarity                                     | `reports/tables/validation_report.json` (`python -m src.validate_data`)                                                                                       | recomputed                                                              |
+| Checksum, split fingerprints                                            | `data/processed/mars_nlp_processed.sha256`, `data/processed/split_fingerprint.json`                                                                           | recomputed                                                              |
+| Baseline metrics (6 models) and CIs                                     | `experiments/results/baseline_results.csv`, `baseline_predictions.csv`                                                                                        | recomputed from raw predictions by `qa_check`; equal to the owner table |
+| Baseline configurations                                                 | `experiments/results/baseline_config.json`, `experiments/configs/baselines.yaml`                                                                              | file                                                                    |
+| Baseline robustness (per type, mean)                                    | `experiments/results/robustness_results.csv`                                                                                                                  | file; Char SVM mean 0.0029 verified                                     |
+| Error counts: 12 baselines                                              | `experiments/results/error_analysis.csv`                                                                                                                      | recomputed; equal to the verified counts                                |
+| Transformer metrics, CIs, training time, GPU, latency, parameters, size | `results/verified_transformer_results.json` (owner-verified Colab T4 run (raw files not in this snapshot)); raw: `experiments/results/transformer_<tag>.json` | owner-supplied (raw files absent here)                                  |
+| Transformer robustness means (-0.0055, 0.0339), error counts (614, 264) | `results/verified_transformer_results.json`; raw: `transformer_robustness_<tag>.csv`, `transformer_predictions_<tag>.csv`                                     | owner-supplied                                                          |
+| Statistical comparisons (3)                                             | `results/verified_transformer_results.json`; raw: paired bootstrap on `transformer_predictions_<tag>.csv`                                                     | owner-supplied                                                          |
+| Owner QA (47 PASS / 0 FAIL / 0 PENDING / 0 SKIP; 63 tests)              | Colab `qa_check` run (`reports/tables/qa_report.json` there)                                                                                                  | owner-supplied                                                          |
+
+## 17. How to re-verify
+
+**Evidence check for the raw Colab transformer artifacts (2026-10-08):** the whole workspace was searched for `transformer_*`, mBERT/XLM-R prediction, metrics (JSON/CSV) and environment files (`/mnt/user-data/uploads`, `/mnt/user-data/outputs`, `/mnt/transcripts`, the repository, `/home`, `/tmp`). **No original Colab outputs were found.** The only matches were temporary pytest fixtures (synthetic test data and a tiny randomly initialised smoke model), which are not results and were not used. The raw Colab transformer artifacts were therefore unavailable for independent local verification; nothing was reconstructed or invented, and the owner-supplied values in `results/verified_transformer_results.json` are kept unchanged.
+
+Copy the Colab files `experiments/results/transformer_{mbert,xlmr}.json`, `transformer_predictions_*.csv`, `transformer_subsets_*.csv`, `transformer_robustness_*.csv` (and optionally the logs) into this repository, then run `python -m src.qa_check && python -m src.make_final_package`. The code prefers raw run files over the owner-verified summary and recomputes every metric from the raw predictions.

@@ -1,0 +1,69 @@
+{
+  "uci_raw_rows": 5574,
+  "zenodo_raw_rows": 1000,
+  "uci_load": {
+    "encoding": "utf-8",
+    "malformed_lines": 0,
+    "n_rows": 5574
+  },
+  "zenodo_load": {
+    "n_rows": 1000,
+    "columns": [
+      "ID",
+      "Raw_text",
+      "Labels",
+      "Source_Type",
+      "Normalized_text"
+    ]
+  },
+  "empty_removed": 0,
+  "cross_source_exact_duplicates_removed": 0,
+  "exact_dedup_per_source": {
+    "SMS Spam Collection (UCI)": {
+      "n_before": 5574,
+      "conflicting_label_messages": 0,
+      "n_after": 5160,
+      "n_removed": 414
+    },
+    "Roman Urdu Phishing SMS Dataset (Zenodo, DOI 10.5281/zenodo.21810885)": {
+      "n_before": 1000,
+      "conflicting_label_messages": 0,
+      "n_after": 1000,
+      "n_removed": 0
+    }
+  },
+  "n_originals": 6160,
+  "n_perturbed": 52031,
+  "n_total": 58191,
+  "n_groups": 4970,
+  "near_dup_threshold": 0.8,
+  "seed": 42,
+  "split_counts_originals": {
+    "train": 4308,
+    "test": 935,
+    "validation": 917
+  },
+  "language_counts_originals": {
+    "English": 5340,
+    "Mixed/Code-Switched": 430,
+    "Roman Urdu": 359,
+    "Unknown": 31
+  },
+  "perturbation_counts": {
+    "spelling_variation": 6042,
+    "character_deletion": 6148,
+    "character_substitution": 6148,
+    "word_spacing_variation": 6053,
+    "punctuation_variation": 6147,
+    "casing_variation": 6156,
+    "informal_abbreviation": 4045,
+    "minor_noise": 5876,
+    "code_switching": 4640,
+    "roman_urdu_spelling_variation": 776
+  },
+  "leakage_check": {
+    "groups_in_multiple_splits": 0,
+    "example_groups": [],
+    "variants_with_split_different_from_original": 0
+  }
+}

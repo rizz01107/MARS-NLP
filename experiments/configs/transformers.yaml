@@ -1,0 +1,15 @@
+# Transformer configuration used for the final Google Colab (NVIDIA Tesla T4) runs. Code: src/train_transformer.py; procedure: docs/COLAB_GPU.md.
+seed: 42
+models: {mbert: bert-base-multilingual-cased, xlmr: xlm-roberta-base, distilmbert: distilbert-base-multilingual-cased}
+max_length: 128
+epochs: 4
+batch_size: 32
+learning_rate: 2.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+early_stopping: {metric: validation macro-F1, patience: 2}
+loss: class-weighted cross-entropy (balanced)
+commands:
+  - python -m src.train_transformer --model mbert --epochs 4 --batch-size 32 --robustness
+  - python -m src.train_transformer --model xlmr --epochs 4 --batch-size 32 --robustness
+  - python -m src.train_transformer --model xlmr --train-languages English --eval-languages "Roman Urdu" "Mixed/Code-Switched"

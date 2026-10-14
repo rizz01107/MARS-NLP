@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it with the metadata below. The accompanying manuscript is unpublished and has not been peer reviewed."
+title: "MARS-NLP: Robust Multilingual Scam Message Classification with Character-Level and Transformer-Based NLP"
+type: software
+authors:
+  - family-names: "Rizwan"
+    given-names: "Muhammad"
+    email: "rizwan01107@gmail.com"
+    affiliation: "Independent Researcher"
+abstract: >-
+  Binary scam message classification for English, Roman Urdu and code-switched SMS text. Character- and word-level TF-IDF
+  classifiers are compared with fine-tuned mBERT and XLM-R under group-aware (near-duplicate) splitting, with a synthetic
+  perturbation suite and cluster-bootstrap confidence intervals.
+keywords:
+  - scam message detection
+  - Roman Urdu
+  - code-switching
+  - multilingual transformers
+  - robustness

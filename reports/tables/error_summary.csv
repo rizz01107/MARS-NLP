@@ -1,0 +1,178 @@
+model,slice,n,errors,error_rate,FP,FN
+TFIDF-char + LinearSVM,originals,935,13,0.013903743315508022,1,12
+TFIDF-char + LinearSVM,perturbed,7943,129,0.016240715095052247,8,121
+TFIDF-char + LinearSVM,originals: English,782,13,0.016624040920716114,1,12
+TFIDF-char + LinearSVM,originals: Roman Urdu + Mixed,149,0,0.0,0,0
+TFIDF-char + LinearSVM,originals: short (<30 chars),110,1,0.00909090909090909,1,0
+TFIDF-char + LinearSVM,perturbed:casing_variation,935,13,0.013903743315508022,1,12
+TFIDF-char + LinearSVM,perturbed:character_deletion,935,15,0.016042780748663103,1,14
+TFIDF-char + LinearSVM,perturbed:character_substitution,935,20,0.0213903743315508,2,18
+TFIDF-char + LinearSVM,perturbed:code_switching,700,13,0.018571428571428572,2,11
+TFIDF-char + LinearSVM,perturbed:informal_abbreviation,632,12,0.0189873417721519,0,12
+TFIDF-char + LinearSVM,perturbed:minor_noise,901,13,0.014428412874583796,0,13
+TFIDF-char + LinearSVM,perturbed:punctuation_variation,932,14,0.015021459227467811,0,14
+TFIDF-char + LinearSVM,perturbed:spelling_variation,913,14,0.01533406352683461,1,13
+TFIDF-char + LinearSVM,perturbed:word_spacing_variation,923,15,0.016251354279523293,1,14
+TFIDF-char + LinearSVM (aug-trained),originals,935,14,0.014973262032085561,2,12
+TFIDF-char + LinearSVM (aug-trained),perturbed,7943,132,0.016618406143774394,11,121
+TFIDF-char + LinearSVM (aug-trained),originals: English,782,13,0.016624040920716114,1,12
+TFIDF-char + LinearSVM (aug-trained),originals: Roman Urdu + Mixed,149,1,0.006711409395973154,1,0
+TFIDF-char + LinearSVM (aug-trained),originals: short (<30 chars),110,1,0.00909090909090909,1,0
+TFIDF-char + LinearSVM (aug-trained),perturbed:casing_variation,935,14,0.014973262032085561,2,12
+TFIDF-char + LinearSVM (aug-trained),perturbed:character_deletion,935,20,0.0213903743315508,5,15
+TFIDF-char + LinearSVM (aug-trained),perturbed:character_substitution,935,18,0.019251336898395723,0,18
+TFIDF-char + LinearSVM (aug-trained),perturbed:code_switching,700,12,0.017142857142857144,1,11
+TFIDF-char + LinearSVM (aug-trained),perturbed:informal_abbreviation,632,12,0.0189873417721519,0,12
+TFIDF-char + LinearSVM (aug-trained),perturbed:minor_noise,901,13,0.014428412874583796,1,12
+TFIDF-char + LinearSVM (aug-trained),perturbed:punctuation_variation,932,15,0.016094420600858368,1,14
+TFIDF-char + LinearSVM (aug-trained),perturbed:spelling_variation,913,14,0.01533406352683461,1,13
+TFIDF-char + LinearSVM (aug-trained),perturbed:word_spacing_variation,923,14,0.015167930660888408,0,14
+TFIDF-char + LogisticRegression,originals,935,12,0.012834224598930482,1,11
+TFIDF-char + LogisticRegression,perturbed,7943,129,0.016240715095052247,9,120
+TFIDF-char + LogisticRegression,originals: English,782,12,0.015345268542199489,1,11
+TFIDF-char + LogisticRegression,originals: Roman Urdu + Mixed,149,0,0.0,0,0
+TFIDF-char + LogisticRegression,originals: short (<30 chars),110,1,0.00909090909090909,1,0
+TFIDF-char + LogisticRegression,perturbed:casing_variation,935,12,0.012834224598930482,1,11
+TFIDF-char + LogisticRegression,perturbed:character_deletion,935,15,0.016042780748663103,2,13
+TFIDF-char + LogisticRegression,perturbed:character_substitution,935,19,0.020320855614973262,2,17
+TFIDF-char + LogisticRegression,perturbed:code_switching,700,11,0.015714285714285715,1,10
+TFIDF-char + LogisticRegression,perturbed:informal_abbreviation,632,12,0.0189873417721519,0,12
+TFIDF-char + LogisticRegression,perturbed:minor_noise,901,12,0.013318534961154272,0,12
+TFIDF-char + LogisticRegression,perturbed:punctuation_variation,932,16,0.017167381974248927,1,15
+TFIDF-char + LogisticRegression,perturbed:roman_urdu_spelling_variation,137,3,0.021897810218978103,0,3
+TFIDF-char + LogisticRegression,perturbed:spelling_variation,913,14,0.01533406352683461,1,13
+TFIDF-char + LogisticRegression,perturbed:word_spacing_variation,923,15,0.016251354279523293,1,14
+TFIDF-char + LogisticRegression (aug-trained),originals,935,15,0.016042780748663103,4,11
+TFIDF-char + LogisticRegression (aug-trained),perturbed,7943,144,0.018129170338662973,25,119
+TFIDF-char + LogisticRegression (aug-trained),originals: English,782,12,0.015345268542199489,1,11
+TFIDF-char + LogisticRegression (aug-trained),originals: Roman Urdu + Mixed,149,3,0.020134228187919462,3,0
+TFIDF-char + LogisticRegression (aug-trained),originals: short (<30 chars),110,1,0.00909090909090909,1,0
+TFIDF-char + LogisticRegression (aug-trained),perturbed:casing_variation,935,15,0.016042780748663103,4,11
+TFIDF-char + LogisticRegression (aug-trained),perturbed:character_deletion,935,23,0.02459893048128342,9,14
+TFIDF-char + LogisticRegression (aug-trained),perturbed:character_substitution,935,18,0.019251336898395723,0,18
+TFIDF-char + LogisticRegression (aug-trained),perturbed:code_switching,700,13,0.018571428571428572,2,11
+TFIDF-char + LogisticRegression (aug-trained),perturbed:informal_abbreviation,632,12,0.0189873417721519,0,12
+TFIDF-char + LogisticRegression (aug-trained),perturbed:minor_noise,901,16,0.017758046614872364,4,12
+TFIDF-char + LogisticRegression (aug-trained),perturbed:punctuation_variation,932,17,0.018240343347639486,3,14
+TFIDF-char + LogisticRegression (aug-trained),perturbed:spelling_variation,913,16,0.017524644030668127,3,13
+TFIDF-char + LogisticRegression (aug-trained),perturbed:word_spacing_variation,923,14,0.015167930660888408,0,14
+TFIDF-char + NaiveBayes,originals,935,67,0.07165775401069518,44,23
+TFIDF-char + NaiveBayes,perturbed,7943,466,0.05866800956817324,263,203
+TFIDF-char + NaiveBayes,originals: English,782,25,0.0319693094629156,2,23
+TFIDF-char + NaiveBayes,originals: Roman Urdu + Mixed,149,42,0.28187919463087246,42,0
+TFIDF-char + NaiveBayes,originals: short (<30 chars),110,1,0.00909090909090909,1,0
+TFIDF-char + NaiveBayes,perturbed:casing_variation,935,67,0.07165775401069518,44,23
+TFIDF-char + NaiveBayes,perturbed:character_deletion,935,60,0.06417112299465241,37,23
+TFIDF-char + NaiveBayes,perturbed:character_substitution,935,58,0.06203208556149733,36,22
+TFIDF-char + NaiveBayes,perturbed:code_switching,700,35,0.05,13,22
+TFIDF-char + NaiveBayes,perturbed:informal_abbreviation,632,23,0.03639240506329114,1,22
+TFIDF-char + NaiveBayes,perturbed:minor_noise,901,56,0.06215316315205328,34,22
+TFIDF-char + NaiveBayes,perturbed:punctuation_variation,932,39,0.04184549356223176,16,23
+TFIDF-char + NaiveBayes,perturbed:roman_urdu_spelling_variation,137,19,0.1386861313868613,19,0
+TFIDF-char + NaiveBayes,perturbed:spelling_variation,913,56,0.06133625410733844,35,21
+TFIDF-char + NaiveBayes,perturbed:word_spacing_variation,923,53,0.05742145178764897,28,25
+TFIDF-char + NaiveBayes (aug-trained),originals,935,41,0.04385026737967915,19,22
+TFIDF-char + NaiveBayes (aug-trained),perturbed,7943,382,0.04809266020395317,183,199
+TFIDF-char + NaiveBayes (aug-trained),originals: English,782,24,0.030690537084398978,2,22
+TFIDF-char + NaiveBayes (aug-trained),originals: Roman Urdu + Mixed,149,17,0.11409395973154363,17,0
+TFIDF-char + NaiveBayes (aug-trained),originals: short (<30 chars),110,1,0.00909090909090909,1,0
+TFIDF-char + NaiveBayes (aug-trained),perturbed:casing_variation,935,41,0.04385026737967915,19,22
+TFIDF-char + NaiveBayes (aug-trained),perturbed:character_deletion,935,52,0.05561497326203209,32,20
+TFIDF-char + NaiveBayes (aug-trained),perturbed:character_substitution,935,52,0.05561497326203209,29,23
+TFIDF-char + NaiveBayes (aug-trained),perturbed:code_switching,700,22,0.03142857142857143,1,21
+TFIDF-char + NaiveBayes (aug-trained),perturbed:informal_abbreviation,632,22,0.03481012658227848,1,21
+TFIDF-char + NaiveBayes (aug-trained),perturbed:minor_noise,901,48,0.05327413984461709,25,23
+TFIDF-char + NaiveBayes (aug-trained),perturbed:punctuation_variation,932,30,0.032188841201716736,9,21
+TFIDF-char + NaiveBayes (aug-trained),perturbed:roman_urdu_spelling_variation,137,33,0.24087591240875914,33,0
+TFIDF-char + NaiveBayes (aug-trained),perturbed:spelling_variation,913,45,0.04928806133625411,22,23
+TFIDF-char + NaiveBayes (aug-trained),perturbed:word_spacing_variation,923,37,0.04008667388949079,12,25
+TFIDF-word + LinearSVM,originals,935,13,0.013903743315508022,1,12
+TFIDF-word + LinearSVM,perturbed,7943,164,0.020647110663477276,39,125
+TFIDF-word + LinearSVM,originals: English,782,13,0.016624040920716114,1,12
+TFIDF-word + LinearSVM,originals: Roman Urdu + Mixed,149,0,0.0,0,0
+TFIDF-word + LinearSVM,originals: short (<30 chars),110,0,0.0,0,0
+TFIDF-word + LinearSVM,perturbed:casing_variation,935,13,0.013903743315508022,1,12
+TFIDF-word + LinearSVM,perturbed:character_deletion,935,21,0.022459893048128343,5,16
+TFIDF-word + LinearSVM,perturbed:character_substitution,935,23,0.02459893048128342,5,18
+TFIDF-word + LinearSVM,perturbed:code_switching,700,11,0.015714285714285715,1,10
+TFIDF-word + LinearSVM,perturbed:informal_abbreviation,632,12,0.0189873417721519,2,10
+TFIDF-word + LinearSVM,perturbed:minor_noise,901,18,0.01997780244173141,6,12
+TFIDF-word + LinearSVM,perturbed:punctuation_variation,932,13,0.013948497854077254,1,12
+TFIDF-word + LinearSVM,perturbed:roman_urdu_spelling_variation,137,5,0.0364963503649635,0,5
+TFIDF-word + LinearSVM,perturbed:spelling_variation,913,22,0.024096385542168676,9,13
+TFIDF-word + LinearSVM,perturbed:word_spacing_variation,923,26,0.028169014084507043,9,17
+TFIDF-word + LinearSVM (aug-trained),originals,935,56,0.059893048128342244,46,10
+TFIDF-word + LinearSVM (aug-trained),perturbed,7943,455,0.057283142389525366,354,101
+TFIDF-word + LinearSVM (aug-trained),originals: English,782,11,0.014066496163682864,1,10
+TFIDF-word + LinearSVM (aug-trained),originals: Roman Urdu + Mixed,149,45,0.30201342281879195,45,0
+TFIDF-word + LinearSVM (aug-trained),originals: short (<30 chars),110,0,0.0,0,0
+TFIDF-word + LinearSVM (aug-trained),perturbed:casing_variation,935,55,0.058823529411764705,45,10
+TFIDF-word + LinearSVM (aug-trained),perturbed:character_deletion,935,50,0.053475935828877004,38,12
+TFIDF-word + LinearSVM (aug-trained),perturbed:character_substitution,935,51,0.05454545454545454,36,15
+TFIDF-word + LinearSVM (aug-trained),perturbed:code_switching,700,53,0.07571428571428572,42,11
+TFIDF-word + LinearSVM (aug-trained),perturbed:informal_abbreviation,632,12,0.0189873417721519,1,11
+TFIDF-word + LinearSVM (aug-trained),perturbed:minor_noise,901,51,0.05660377358490566,41,10
+TFIDF-word + LinearSVM (aug-trained),perturbed:punctuation_variation,932,56,0.060085836909871244,46,10
+TFIDF-word + LinearSVM (aug-trained),perturbed:roman_urdu_spelling_variation,137,29,0.2116788321167883,29,0
+TFIDF-word + LinearSVM (aug-trained),perturbed:spelling_variation,913,54,0.05914567360350493,44,10
+TFIDF-word + LinearSVM (aug-trained),perturbed:word_spacing_variation,923,44,0.047670639219934995,32,12
+TFIDF-word + LogisticRegression,originals,935,29,0.031016042780748664,17,12
+TFIDF-word + LogisticRegression,perturbed,7943,262,0.032985018255067354,139,123
+TFIDF-word + LogisticRegression,originals: English,782,12,0.015345268542199489,0,12
+TFIDF-word + LogisticRegression,originals: Roman Urdu + Mixed,149,17,0.11409395973154363,17,0
+TFIDF-word + LogisticRegression,originals: short (<30 chars),110,0,0.0,0,0
+TFIDF-word + LogisticRegression,perturbed:casing_variation,935,29,0.031016042780748664,17,12
+TFIDF-word + LogisticRegression,perturbed:character_deletion,935,34,0.03636363636363636,19,15
+TFIDF-word + LogisticRegression,perturbed:character_substitution,935,35,0.0374331550802139,17,18
+TFIDF-word + LogisticRegression,perturbed:code_switching,700,28,0.04,17,11
+TFIDF-word + LogisticRegression,perturbed:informal_abbreviation,632,11,0.01740506329113924,1,10
+TFIDF-word + LogisticRegression,perturbed:minor_noise,901,28,0.03107658157602664,16,12
+TFIDF-word + LogisticRegression,perturbed:punctuation_variation,932,29,0.03111587982832618,17,12
+TFIDF-word + LogisticRegression,perturbed:roman_urdu_spelling_variation,137,7,0.051094890510948905,2,5
+TFIDF-word + LogisticRegression,perturbed:spelling_variation,913,32,0.03504928806133625,19,13
+TFIDF-word + LogisticRegression,perturbed:word_spacing_variation,923,29,0.0314192849404117,14,15
+TFIDF-word + LogisticRegression (aug-trained),originals,935,59,0.06310160427807486,48,11
+TFIDF-word + LogisticRegression (aug-trained),perturbed,7943,450,0.056653657308321795,345,105
+TFIDF-word + LogisticRegression (aug-trained),originals: English,782,13,0.016624040920716114,2,11
+TFIDF-word + LogisticRegression (aug-trained),originals: Roman Urdu + Mixed,149,46,0.3087248322147651,46,0
+TFIDF-word + LogisticRegression (aug-trained),originals: short (<30 chars),110,0,0.0,0,0
+TFIDF-word + LogisticRegression (aug-trained),perturbed:casing_variation,935,58,0.06203208556149733,47,11
+TFIDF-word + LogisticRegression (aug-trained),perturbed:character_deletion,935,51,0.05454545454545454,39,12
+TFIDF-word + LogisticRegression (aug-trained),perturbed:character_substitution,935,49,0.052406417112299465,34,15
+TFIDF-word + LogisticRegression (aug-trained),perturbed:code_switching,700,53,0.07571428571428572,43,10
+TFIDF-word + LogisticRegression (aug-trained),perturbed:informal_abbreviation,632,12,0.0189873417721519,1,11
+TFIDF-word + LogisticRegression (aug-trained),perturbed:minor_noise,901,53,0.058823529411764705,42,11
+TFIDF-word + LogisticRegression (aug-trained),perturbed:punctuation_variation,932,58,0.06223175965665236,48,10
+TFIDF-word + LogisticRegression (aug-trained),perturbed:roman_urdu_spelling_variation,137,21,0.15328467153284672,21,0
+TFIDF-word + LogisticRegression (aug-trained),perturbed:spelling_variation,913,53,0.05805038335158817,42,11
+TFIDF-word + LogisticRegression (aug-trained),perturbed:word_spacing_variation,923,42,0.04550379198266522,28,14
+TFIDF-word + NaiveBayes,originals,935,59,0.06310160427807486,34,25
+TFIDF-word + NaiveBayes,perturbed,7943,491,0.06181543497419111,252,239
+TFIDF-word + NaiveBayes,originals: English,782,26,0.03324808184143223,1,25
+TFIDF-word + NaiveBayes,originals: Roman Urdu + Mixed,149,33,0.2214765100671141,33,0
+TFIDF-word + NaiveBayes,originals: short (<30 chars),110,1,0.00909090909090909,1,0
+TFIDF-word + NaiveBayes,perturbed:casing_variation,935,59,0.06310160427807486,34,25
+TFIDF-word + NaiveBayes,perturbed:character_deletion,935,62,0.06631016042780749,29,33
+TFIDF-word + NaiveBayes,perturbed:character_substitution,935,65,0.06951871657754011,35,30
+TFIDF-word + NaiveBayes,perturbed:code_switching,700,39,0.055714285714285716,18,21
+TFIDF-word + NaiveBayes,perturbed:informal_abbreviation,632,25,0.03955696202531646,1,24
+TFIDF-word + NaiveBayes,perturbed:minor_noise,901,57,0.06326304106548279,35,22
+TFIDF-word + NaiveBayes,perturbed:punctuation_variation,932,59,0.06330472103004292,34,25
+TFIDF-word + NaiveBayes,perturbed:roman_urdu_spelling_variation,137,16,0.11678832116788321,16,0
+TFIDF-word + NaiveBayes,perturbed:spelling_variation,913,61,0.06681270536692223,32,29
+TFIDF-word + NaiveBayes,perturbed:word_spacing_variation,923,48,0.05200433369447454,18,30
+TFIDF-word + NaiveBayes (aug-trained),originals,935,29,0.031016042780748664,9,20
+TFIDF-word + NaiveBayes (aug-trained),perturbed,7943,330,0.04154601535943598,131,199
+TFIDF-word + NaiveBayes (aug-trained),originals: English,782,22,0.028132992327365727,2,20
+TFIDF-word + NaiveBayes (aug-trained),originals: Roman Urdu + Mixed,149,7,0.04697986577181208,7,0
+TFIDF-word + NaiveBayes (aug-trained),originals: short (<30 chars),110,1,0.00909090909090909,1,0
+TFIDF-word + NaiveBayes (aug-trained),perturbed:casing_variation,935,29,0.031016042780748664,9,20
+TFIDF-word + NaiveBayes (aug-trained),perturbed:character_deletion,935,49,0.052406417112299465,22,27
+TFIDF-word + NaiveBayes (aug-trained),perturbed:character_substitution,935,52,0.05561497326203209,28,24
+TFIDF-word + NaiveBayes (aug-trained),perturbed:code_switching,700,25,0.03571428571428571,5,20
+TFIDF-word + NaiveBayes (aug-trained),perturbed:informal_abbreviation,632,21,0.03322784810126582,1,20
+TFIDF-word + NaiveBayes (aug-trained),perturbed:minor_noise,901,37,0.041065482796892344,16,21
+TFIDF-word + NaiveBayes (aug-trained),perturbed:punctuation_variation,932,30,0.032188841201716736,9,21
+TFIDF-word + NaiveBayes (aug-trained),perturbed:roman_urdu_spelling_variation,137,13,0.0948905109489051,13,0
+TFIDF-word + NaiveBayes (aug-trained),perturbed:spelling_variation,913,32,0.03504928806133625,12,20
+TFIDF-word + NaiveBayes (aug-trained),perturbed:word_spacing_variation,923,42,0.04550379198266522,16,26

@@ -1,0 +1,13 @@
+# Extra packages for Google Colab (Colab already ships torch, numpy, pandas, scipy, matplotlib, seaborn, joblib, pyyaml).
+# scikit-learn is PINNED to the version the saved CPU baselines were pickled with (verified: pandas 2.2 / numpy 2.0 work with it).
+scikit-learn==1.8.0
+transformers>=4.40
+sentencepiece>=0.1.99
+tokenizers>=0.15
+lime>=0.2.0.1
+tabulate>=0.9
+openpyxl>=3.1
+streamlit>=1.50
+pytest>=8.0
+pyflakes
+nbformat>=5.9

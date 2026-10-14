@@ -1,0 +1,88 @@
+"""Central configuration for MARS-NLP (paths, schema, constants).
+
+All paths are derived from the repository root so every script can be run
+from the repo root with ``python -m src.<module>``.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+DATA_DIR = ROOT_DIR / "data"
+RAW_DIR = DATA_DIR / "raw"
+PROCESSED_DIR = DATA_DIR / "processed"
+UCI_RAW = RAW_DIR / "uci" / "SMSSpamCollection"
+ZENODO_RAW = RAW_DIR / "zenodo" / "phishing_dataset_1000.xlsx"
+SCAFFOLD_DIR = RAW_DIR / "scaffold"
+PROCESSED_CSV = PROCESSED_DIR / "mars_nlp_processed.csv"
+PROCESSED_XLSX = PROCESSED_DIR / "mars_nlp_processed.xlsx"
+
+REPORTS_DIR = ROOT_DIR / "reports"
+FIGURES_DIR = REPORTS_DIR / "figures"
+TABLES_DIR = REPORTS_DIR / "tables"
+EXPERIMENTS_DIR = ROOT_DIR / "experiments"
+CONFIGS_DIR = EXPERIMENTS_DIR / "configs"
+RESULTS_DIR = EXPERIMENTS_DIR / "results"
+MODELS_DIR = ROOT_DIR / "models"
+
+SEED = 42
+
+# ---- label schema --------------------------------------------------------
+LABELS = ("Legitimate", "Scam")
+LABEL2ID = {"Legitimate": 0, "Scam": 1}
+ID2LABEL = {v: k for k, v in LABEL2ID.items()}
+
+# ---- language schema -----------------------------------------------------
+LANG_ENGLISH = "English"
+LANG_URDU = "Urdu"
+LANG_ROMAN_URDU = "Roman Urdu"
+LANG_MIXED = "Mixed/Code-Switched"
+LANG_UNKNOWN = "Unknown"
+LANGUAGES = (LANG_ENGLISH, LANG_URDU, LANG_ROMAN_URDU, LANG_MIXED, LANG_UNKNOWN)
+EVAL_LANGUAGES = (LANG_ENGLISH, LANG_URDU, LANG_ROMAN_URDU, LANG_MIXED)
+
+# ---- provenance ----------------------------------------------------------
+SOURCE_REAL = "real_public_dataset"
+SOURCE_AUGMENTED = "augmented_from_real"
+SOURCE_TYPES = (SOURCE_REAL, SOURCE_AUGMENTED)
+
+SRC_UCI = "SMS Spam Collection (UCI)"
+SRC_ZENODO = "Roman Urdu Phishing SMS Dataset (Zenodo, DOI 10.5281/zenodo.21810885)"
+URL_UCI = "https://archive.ics.uci.edu/dataset/228/sms+spam+collection"
+URL_ZENODO = "https://zenodo.org/records/21810885"
+LICENSE_UCI = "CC BY 4.0 (as reported on UCI page; bundled readme: free use, copyright + citation request)"
+LICENSE_ZENODO = "CC BY 4.0 (Creative Commons Attribution 4.0 International; verified on Zenodo record)"
+
+# ---- perturbations -------------------------------------------------------
+NO_PERTURBATION = "none"
+PERTURBATION_TYPES = (
+    "spelling_variation",
+    "character_deletion",
+    "character_substitution",
+    "word_spacing_variation",
+    "punctuation_variation",
+    "casing_variation",
+    "informal_abbreviation",
+    "roman_urdu_spelling_variation",
+    "code_switching",
+    "minor_noise",
+)
+
+# ---- splits --------------------------------------------------------------
+SPLITS = ("train", "validation", "test")
+SPLIT_FRACTIONS = (0.70, 0.15, 0.15)
+NEAR_DUP_THRESHOLD = 0.80   # cosine similarity (char n-gram TF-IDF) for near-duplicate grouping
+MIN_EVAL_N = 30             # minimum samples for per-language reporting
+MIN_EVAL_PER_CLASS = 5      # minimum samples of each class for per-language reporting
+MIN_EVAL_GROUPS = 20        # below this many independent near-duplicate groups, results are "descriptive only"
+
+# ---- schema --------------------------------------------------------------
+README_COLUMNS = [
+    "message_id", "message", "language", "label", "source_dataset", "source_url",
+    "source_license", "source_type", "message_type", "is_code_switched",
+    "is_perturbed", "perturbation_type", "original_message_id", "split",
+]
+EXTRA_COLUMNS = ["cleaned_message", "group_id", "language_confidence"]
+REQUIRED_COLUMNS = README_COLUMNS + EXTRA_COLUMNS
+
+MAX_INPUT_CHARS = 5000  # app/prediction guard

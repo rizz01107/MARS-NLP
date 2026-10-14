@@ -1,0 +1,14 @@
+# Documentation of the baseline experiment configuration (the code in src/train_baselines.py is the source of truth).
+seed: 42
+split: {train: 0.70, validation: 0.15, test: 0.15, level: near-duplicate group, stratify: [source_dataset, label]}
+near_duplicate_threshold: 0.80
+features:
+  word: {analyzer: word, ngram_range: [1, 2], min_df: 2, sublinear_tf: true, lowercase: true}
+  char: {analyzer: char_wb, ngram_range: [2, 5], min_df: 2, sublinear_tf: true, max_features: 300000, lowercase: true}
+models:
+  lr:  {class: LogisticRegression, solver: liblinear, class_weight: balanced, grid_C: [0.1, 1, 10, 100]}
+  svm: {class: LinearSVC, class_weight: balanced, grid_C: [0.01, 0.1, 1, 10]}
+  nb:  {class: MultinomialNB, grid_alpha: [0.01, 0.1, 0.5, 1.0]}
+selection_metric: validation macro-F1 (originals only)
+training_modes: [originals, originals+perturbed_variants]
+bootstrap: {type: cluster (near-duplicate groups), n_boot: 1000, alpha: 0.05}

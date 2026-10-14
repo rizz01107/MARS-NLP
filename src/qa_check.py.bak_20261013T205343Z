@@ -1,0 +1,485 @@
+"""Complete QA suite.  Usage:  python -m src.qa_check [--skip-pytest] [--skip-server]
+
+Checks: syntax/import, pytest, dataset validation, leakage + split fingerprints, result-file schemas, metric traceability
+(every reported metric is recomputed from a raw predictions file), transformer completeness (no N/A left for an executed
+run), report generation, Streamlit (AppTest + headless server), prediction smoke tests. Writes reports/tables/qa_report.{md,json}
+and then regenerates reports/FINAL_GPU_REVIEW.md. Exit code 1 if any check FAILS. A transformer that was not executed is
+reported as PENDING (never as passed/executed).
+"""
+from __future__ import annotations
+
+import argparse
+import importlib
+import json
+import pkgutil
+import subprocess
+import sys
+import time
+import urllib.request
+
+import numpy as np
+import pandas as pd
+
+from . import config as C
+from .evaluation import compute_metrics
+from .utils import save_json, sha256_file, split_fingerprint
+from .verified import load_supplement
+
+R, T = C.RESULTS_DIR, C.TABLES_DIR
+RESULTS: list[dict] = []
+REQUIRED_EXEC_COLS = ["Accuracy", "Precision", "Recall", "Macro_F1", "Weighted_F1", "Macro_F1_CI95", "English_F1",
+                      "RomanUrdu_plus_Mixed_F1", "Parameters", "Model_Size", "Inference_Latency", "Robustness_Degradation", "Train_Seconds"]
+ERR_COLS = ["message", "language", "true_label", "predicted_label", "confidence", "error_category", "model"]
+
+
+def add(name: str, status: str, detail: str = "", group: str = "core") -> None:
+    """``group='documentation'`` entries are reported separately and are NOT part of the core check counts."""
+    RESULTS.append({"check": name, "status": status, "detail": detail, "group": group})
+    print(f"[{status:7}] {name}" + (f" - {detail}" if detail else ""), flush=True)
+
+
+def run_cmd(args: list[str], timeout: int = 1800) -> tuple[int, str]:
+    p = subprocess.run(args, cwd=C.ROOT_DIR, capture_output=True, text=True, timeout=timeout)
+    return p.returncode, (p.stdout + "\n" + p.stderr)[-3000:]
+
+
+def _executed_transformers() -> dict:
+    from .make_results import CANONICAL_TRANSFORMERS, load_transformer_result
+
+    return {t: r for t in CANONICAL_TRANSFORMERS if (r := load_transformer_result(t)) is not None}
+
+
+# --------------------------------------------------------------------------- individual checks
+def check_syntax_imports() -> None:
+    rc, out = run_cmd([sys.executable, "-m", "compileall", "-q", "src", "app", "tests"])
+    add("syntax: compileall src/app/tests", "PASS" if rc == 0 else "FAIL", "" if rc == 0 else out[-300:])
+    bad = []
+    import src
+
+    for m in pkgutil.iter_modules(src.__path__):
+        try:
+            importlib.import_module(f"src.{m.name}")
+        except Exception as exc:
+            bad.append(f"src.{m.name}: {type(exc).__name__}: {exc}")
+    add("imports: every src module imports (no circular/broken imports)", "PASS" if not bad else "FAIL", "; ".join(bad))
+
+
+def check_pytest() -> None:
+    rc, out = run_cmd([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"], timeout=3000)
+    tail = out.strip().splitlines()[-1] if out.strip() else ""
+    add("pytest -q", "PASS" if rc == 0 else "FAIL", tail)
+
+
+def check_data_and_leakage() -> None:
+    from .data_loader import load_processed
+    from .splitting import check_group_leakage
+
+    rc, out = run_cmd([sys.executable, "-m", "src.validate_data"])
+    add("dataset validation (src.validate_data, exit code)", "PASS" if rc == 0 else "FAIL", "0 critical failures" if rc == 0 else out[-300:])
+    df = load_processed()
+    leak = check_group_leakage(df)
+    ok = leak["groups_in_multiple_splits"] == 0 and leak["variants_with_split_different_from_original"] == 0
+    add("leakage: no group in >1 split; every variant in its original's split", "PASS" if ok else "FAIL", str(leak))
+    o = df[~df.is_perturbed.astype(bool)]
+    sets = {s: set(o[o.split == s].cleaned_message) for s in C.SPLITS}
+    overlap = len(sets["train"] & sets["test"]) + len(sets["train"] & sets["validation"]) + len(sets["validation"] & sets["test"])
+    add("leakage: no exact text overlap between splits", "PASS" if overlap == 0 else "FAIL", f"{overlap} shared")
+    expected = (C.PROCESSED_DIR / "mars_nlp_processed.sha256").read_text().split()[0]
+    add("data: processed CSV checksum equals the audited file", "PASS" if sha256_file(C.PROCESSED_CSV) == expected else "FAIL")
+    ref = json.loads((C.PROCESSED_DIR / "split_fingerprint.json").read_text())
+    add("data: split fingerprints unchanged (test split not modified)", "PASS" if split_fingerprint(df) == ref else "FAIL")
+    for tag, r in _executed_transformers().items():
+        same = r.get("split_fingerprint") == ref and r.get("processed_csv_sha256") == expected
+        add(f"transformer {tag}: trained/evaluated on the audited split & data", "PASS" if same else "FAIL")
+
+
+def check_result_files() -> None:
+    need = ["baseline_results.csv", "baseline_predictions.csv", "baseline_config.json", "robustness_results.csv", "cross_lingual_results.csv",
+            "group_cv_results.csv", "group_cv_robustness.csv", "error_analysis.csv", "final_results.csv"]
+    missing = [n for n in need if not (R / n).exists()]
+    add("result files exist (baselines/robustness/cross-lingual/final)", "PASS" if not missing else "FAIL", f"missing: {missing}")
+    if missing:
+        return
+    err = pd.read_csv(R / "error_analysis.csv", nrows=5)
+    add("error_analysis.csv has exactly the required 7 columns", "PASS" if list(err.columns) == ERR_COLS else "FAIL", str(list(err.columns)))
+    fin = pd.read_csv(R / "final_results.csv", keep_default_na=False)
+    need_cols = ["Model", "Accuracy", "Precision", "Recall", "Macro_F1", "Weighted_F1", "English_F1", "Urdu_F1", "Roman_Urdu_F1", "Parameters",
+                 "Model_Size", "Inference_Latency", "Robustness_Degradation"]
+    add("final_results.csv has the required columns", "PASS" if set(need_cols) <= set(fin.columns) else "FAIL")
+    ex = _executed_transformers()
+    for tag in ("mbert", "xlmr"):
+        if tag not in ex:
+            add(f"transformer {tag}: raw result files", "PENDING",
+                "raw run files are not in this snapshot; values come from the owner-verified summary (copy experiments/results/transformer_* from Colab and re-run to verify)"
+                if load_supplement() else "not executed - no results exist (correctly N/A)")
+            continue
+        files = [R / f"transformer_{tag}.json", R / f"transformer_predictions_{tag}.csv", R / f"transformer_subsets_{tag}.csv",
+                 R / f"transformer_robustness_{tag}.csv", C.MODELS_DIR / "transformers" / tag / "config.json"]
+        miss = [str(f.relative_to(C.ROOT_DIR)) for f in files if not f.exists()]
+        add(f"transformer {tag}: required output files exist", "PASS" if not miss else "FAIL", f"missing: {miss}")
+        r = ex[tag]
+        add(f"transformer {tag}: ran on GPU", "PASS" if r["device"] == "cuda" else "FAIL", f"device={r['device']} gpu={r['environment'].get('gpu_name')}")
+
+
+def check_metric_traceability() -> None:
+    """Every metric in final_results.csv must be reproducible from a raw predictions file."""
+    from .data_loader import get_split, load_processed
+
+    fin = pd.read_csv(R / "final_results.csv", keep_default_na=False)
+    test = get_split(load_processed(), "test")
+    labels = test.set_index("message_id")["label_id"]
+    bp = pd.read_csv(R / "baseline_predictions.csv")
+    bad, n_checked = [], 0
+    cmap = {"Accuracy": "accuracy", "Precision": "precision_scam", "Recall": "recall_scam", "Macro_F1": "macro_f1", "Weighted_F1": "weighted_f1"}
+    base_models = pd.read_csv(R / "baseline_results.csv").query("subset == 'Overall'")[["model_id", "model"]]
+    name2id = dict(zip(base_models.model, base_models.model_id))
+    ex = _executed_transformers()
+    tx_names = {r["model"]: t for t, r in ex.items()}
+    for _, row in fin.iterrows():
+        if row["Status"] != "Executed":
+            continue
+        if row["Model"] in name2id:
+            g = bp[bp.model_id == name2id[row["Model"]]]
+            yt, yp = g["y_true"].values, g["y_pred"].values
+        elif row["Model"] in tx_names:
+            tp = pd.read_csv(R / f"transformer_predictions_{tx_names[row['Model']]}.csv")
+            tp = tp[~tp.is_perturbed.astype(bool)]
+            yp, yt = tp["y_pred"].values, tp["y_true"].values
+            if not np.array_equal(labels.reindex(tp.message_id).values, yt) or set(tp.message_id) != set(labels.index):
+                bad.append(f"{row['Model']}: predictions do not cover exactly the 935 test originals / labels differ")
+                continue
+        else:
+            bad.append(f"{row['Model']}: Executed row without a result source")
+            continue
+        m = compute_metrics(yt, yp)
+        for col, key in cmap.items():
+            n_checked += 1
+            try:
+                mismatch = abs(float(row[col]) - round(m[key], 4)) > 1.5e-4
+            except (TypeError, ValueError):
+                mismatch = True
+            if mismatch:
+                bad.append(f"{row['Model']} {col}: table {row[col]} vs recomputed {m[key]:.4f}")
+    add("metrics: every Executed row in final_results.csv recomputed from raw predictions", "PASS" if not bad else "FAIL",
+        f"{n_checked} values checked" + ("" if not bad else "; " + "; ".join(bad[:4])))
+    # robustness / subsets values vs source CSVs for transformers
+    for tag, r in ex.items():
+        row = fin[fin.Model == r["model"]].iloc[0]
+        want = transformer_mean = None
+        f = R / f"transformer_robustness_{tag}.csv"
+        if f.exists():
+            from .robustness import summarise
+
+            want = round(float(summarise(pd.read_csv(f)).iloc[0]["mean_degradation"]), 4)
+        try:
+            okr = want is not None and abs(float(row["Robustness_Degradation"]) - want) < 1e-9
+        except (TypeError, ValueError):
+            okr = False
+        add(f"metrics: transformer {tag} Robustness_Degradation traces to transformer_robustness_{tag}.csv", "PASS" if okr else "FAIL")
+        del transformer_mean
+
+
+def check_no_na_for_executed() -> None:
+    fin = pd.read_csv(R / "final_results.csv", keep_default_na=False)
+    ex = _executed_transformers()
+    if not ex:
+        add("transformers: no-N/A check on raw executed runs", "PENDING", "no raw transformer run files in this snapshot; rows are marked 'Reported' from the owner-verified summary (per-subset cells are N/A by design)" if load_supplement() else "no transformer was executed; N/A rows are correct")
+        return
+    for tag, r in ex.items():
+        row = fin[fin.Model == r["model"]].iloc[0]
+        na = [c for c in REQUIRED_EXEC_COLS if str(row[c]).strip().upper().startswith("N/A") or str(row[c]).strip() == ""]
+        add(f"transformer {tag}: no N/A left in required result columns", "PASS" if not na and row["Status"] == "Executed" else "FAIL",
+            f"N/A in {na}; Status={row['Status']}" if na or row["Status"] != "Executed" else "")
+
+
+def regenerate_outputs() -> None:
+    """Regenerate every derived artefact from the result files (so the checks below see a consistent state)."""
+    for mod in ("src.make_results", "src.compare_models", "src.error_analysis", "src.plots", "src.make_report"):
+        rc, out = run_cmd([sys.executable, "-m", mod], timeout=1800)
+        add(f"report generation: python -m {mod}", "PASS" if rc == 0 else "FAIL", "" if rc == 0 else out[-300:])
+
+
+def check_reports() -> None:
+    rep = (C.REPORTS_DIR / "MARS_NLP_Research_Report.md").read_text(encoding="utf-8")
+    readme = (C.ROOT_DIR / "README.md").read_text(encoding="utf-8")
+    fin = pd.read_csv(R / "final_results.csv", keep_default_na=False)
+    missing = [f"{r.Model}:{r.Macro_F1}" for r in fin.itertuples() if r.Status == "Executed" and str(r.Macro_F1) not in rep]
+    add("report contains every executed model's Macro-F1 exactly as in final_results.csv", "PASS" if not missing else "FAIL", str(missing[:4]))
+    curated = pd.read_csv(C.ROOT_DIR / "results" / "FINAL_RESULTS.csv", keep_default_na=False)
+    miss_r = [f"{r.Model}:{r.Macro_F1}" for r in curated.itertuples() if f"{float(r.Macro_F1):.4f}" not in readme]
+    add("README contains the Macro-F1 of all 8 curated models (results/FINAL_RESULTS.csv)", "PASS" if not miss_r else "FAIL", str(miss_r[:4]))
+    ex = _executed_transformers()
+    stale = [t for t, r in ex.items() if f"{r['model']} | N/A" in rep.replace("  ", " ") or "**Not executed in the current environment.**" in rep]
+    add("report: executed transformers are not described as 'not executed'", "PASS" if not stale else "FAIL", str(stale))
+    add("report: states Roman Urdu/Mixed is descriptive (5 independent test groups)", "PASS" if "5 independent" in rep else "FAIL")
+
+
+def check_streamlit_and_predictions(skip_server: bool) -> None:
+    from .prediction import InvalidInput, available_models, load_predictor, predict_message
+
+    models = available_models()
+    if not models:
+        add("prediction smoke tests", "FAIL", "no model available")
+        return
+    cases = [("English", "URGENT! You have won a prize. Call 09061234567 now."), ("Roman Urdu", "Aap ka account block ho gaya hai. PIN bhejein."),
+             ("Urdu script", "آپ کا اکاؤنٹ بلاک ہو گیا ہے")]
+    for name in sorted(models):
+        try:
+            pr = load_predictor(name)
+            for _, txt in cases:
+                r = predict_message(txt, pr)
+                assert r.label in C.LABELS and 0 <= r.confidence <= 1
+            for bad in ("", "   ", None):
+                try:
+                    predict_message(bad, pr)
+                    raise AssertionError("empty input accepted")
+                except InvalidInput:
+                    pass
+            add(f"prediction smoke test: {name}", "PASS", "English/Roman Urdu/Urdu ok; empty input rejected cleanly")
+        except Exception as exc:
+            add(f"prediction smoke test: {name}", "FAIL", f"{type(exc).__name__}: {exc}")
+    try:
+        from streamlit.testing.v1 import AppTest
+
+        at = AppTest.from_file(str(C.ROOT_DIR / "app" / "app.py"), default_timeout=180).run()
+        ok = not at.exception
+        for txt in ["", "free prize call now", "Aap ka account block hai", "آپ کا اکاؤنٹ", "😀"]:
+            at.text_area[0].set_value(txt).run()
+            [b for b in at.button if b.label == "Analyse"][0].click().run()
+            ok &= not at.exception
+        add("Streamlit AppTest (load + 5 inputs, no exception)", "PASS" if ok else "FAIL")
+    except Exception as exc:
+        add("Streamlit AppTest", "FAIL", f"{type(exc).__name__}: {exc}")
+    if skip_server:
+        add("Streamlit headless server startup", "SKIP", "--skip-server")
+        return
+    port = 8597
+    proc = subprocess.Popen([sys.executable, "-m", "streamlit", "run", "app/app.py", "--server.headless", "true", "--server.port", str(port)],
+                            cwd=C.ROOT_DIR, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    status = "FAIL"
+    try:
+        for _ in range(40):
+            time.sleep(1)
+            try:
+                if urllib.request.urlopen(f"http://localhost:{port}/_stcore/health", timeout=2).read().decode().strip() == "ok":
+                    status = "PASS"
+                    break
+            except Exception:
+                continue
+    finally:
+        proc.terminate()
+        try:
+            proc.wait(timeout=10)
+        except Exception:
+            proc.kill()
+    add("Streamlit headless server startup (/_stcore/health == ok)", status)
+
+
+STALE = ["TRANSFORMERS NOT EXECUTED", "not executed in the current environment", "remain pending", "pending GPU", "implemented but **not executed**",
+         "implemented but not executed"]
+REQUIRED_LIMITS = ["domain-specific", "synthetic", "5 independent", "Urdu-script", "Multi-seed variance", "not exhaustive", "Tesla T4", "SHAP"]
+TITLE = "MARS-NLP: Robust Multilingual Scam Message Classification with Character-Level and Transformer-Based NLP"
+FINAL_FILES = ["results/FINAL_RESULTS.csv", "results/ROBUSTNESS_RESULTS.csv", "results/STATISTICAL_COMPARISONS.csv", "results/ERROR_COUNTS.csv",
+               "results/verified_transformer_results.json", "figures/model_macro_f1_comparison.png", "figures/model_macro_f1_comparison.pdf",
+               "figures/robustness_degradation.png", "figures/robustness_degradation.pdf", "figures/mars_nlp_pipeline.png", "figures/mars_nlp_pipeline.pdf",
+               "reports/FINAL_REPRODUCIBILITY_REPORT.md", "reports/QA_REPORT.md", "reports/MARS_NLP_Research_Report.md", "SUBMISSION_CHECKLIST.md",
+               "RELEASE_MANIFEST.md", "README.md", "docs/COLAB_GPU.md", "predictions/baseline_predictions.csv", "CITATION.cff", "LICENSE",
+               "reports/MARS_NLP_Final_Manuscript.md", "reports/MARS_NLP_Final_Manuscript.pdf"]
+
+
+def check_final_package() -> None:
+    """Consistency of the publication package (results/, figures/, documents) with the saved results and the owner-verified summary."""
+    root = C.ROOT_DIR
+    missing = [f for f in FINAL_FILES if not (root / f).exists()]
+    add("final package: required files exist", "PASS" if not missing else "FAIL", f"missing: {missing}")
+    if missing:
+        return
+    sup = load_supplement()
+    fin = pd.read_csv(root / "results/FINAL_RESULTS.csv", keep_default_na=False)
+    if sup:
+        bad = []
+        for row in sup["owner_final_table"]:
+            r = fin[fin.Model == row["Model"]]
+            if r.empty:
+                bad.append(f"{row['Model']}: missing")
+                continue
+            for k in ("Accuracy", "Precision", "Recall", "Macro_F1", "Weighted_F1"):
+                if abs(float(r.iloc[0][k]) - row[k]) > 1e-4:
+                    bad.append(f"{row['Model']} {k}: {r.iloc[0][k]} vs owner {row[k]}")
+        add("final results equal the owner-verified table (8 models x 5 metrics)", "PASS" if not bad else "FAIL", "; ".join(bad[:4]))
+        ec = pd.read_csv(root / "results/ERROR_COUNTS.csv", keep_default_na=False).set_index("Model_ID")["Errors"].astype(int).to_dict()
+        want = sup["error_counts_test_originals_plus_variants"]
+        diff = [f"{k}: {ec.get(k)} vs {v}" for k, v in want.items() if ec.get(k) != v]
+        add("per-model error counts equal the verified counts (14 models)", "PASS" if not diff else "FAIL", "; ".join(diff[:4]))
+        rb = pd.read_csv(root / "results/ROBUSTNESS_RESULTS.csv", keep_default_na=False)
+        m = rb[rb.Level == "mean over 10 perturbation types"].set_index("Model")["Degradation"].astype(float)
+        okr = abs(m["Char TF-IDF + Linear SVM"] - 0.0029) < 1e-4 and abs(m["mBERT"] + 0.0055) < 1e-4 and abs(m["XLM-R"] - 0.0339) < 1e-4
+        add("robustness degradation: SVM 0.0029, mBERT -0.0055, XLM-R 0.0339", "PASS" if okr else "FAIL", str(m.round(4).to_dict()))
+        st = pd.read_csv(root / "results/STATISTICAL_COMPARISONS.csv")
+        okc = len(st) == 3 and (st.CI_includes_zero.astype(str).tolist() == ["True", "False", "True"])
+        add("statistical comparisons: 3 rows, CI includes zero / excludes zero / includes zero", "PASS" if okc else "FAIL")
+        ds = sup["dataset"]
+        from .data_loader import get_split, load_processed
+
+        df = load_processed()
+        te = get_split(df, "test")
+        facts = {"originals": int((~df.is_perturbed.astype(bool)).sum()), "variants": int(df.is_perturbed.astype(bool).sum()),
+                 "train": len(get_split(df, "train")), "val": len(get_split(df, "validation")), "test": len(te), "groups": int(te.group_id.nunique()),
+                 "english": int((te.language == C.LANG_ENGLISH).sum()), "ru_mixed": int(te.language.isin([C.LANG_ROMAN_URDU, C.LANG_MIXED]).sum())}
+        exp = {"originals": ds["originals"], "variants": ds["perturbed_variants"], "train": ds["train_originals"], "val": ds["validation_originals"],
+               "test": ds["test_originals"], "groups": ds["test_groups"], "english": ds["test_english"], "ru_mixed": ds["test_roman_urdu_mixed"]}
+        add("dataset facts recomputed from processed CSV equal the verified facts", "PASS" if facts == exp else "FAIL", f"{facts}" if facts != exp else "6160 / 52079 / 4308 / 917 / 935 / 778 groups / 782 / 149")
+    docs = {f: (root / f).read_text(encoding="utf-8") for f in ["README.md", "reports/MARS_NLP_Research_Report.md", "reports/FINAL_REPRODUCIBILITY_REPORT.md",
+                                                                  "reports/FINAL_GPU_REVIEW.md", "reports/QA_REPORT.md", "docs/COLAB_GPU.md", "SUBMISSION_CHECKLIST.md"]}
+    def _strip_qa(t: str) -> str:   # the GPU review echoes failed-check names from the previous QA run; exclude that section
+        return t.split("## QA suite")[0] + (t.split("## Confirmation")[1] if "## Confirmation" in t else "") if "## QA suite" in t else t
+
+    scan = {f: (_strip_qa(t) if f == "reports/FINAL_GPU_REVIEW.md" else t) for f, t in docs.items() if f != "reports/QA_REPORT.md"}   # the QA report quotes the names of these very checks
+    if sup:
+        stale = [(f, ph) for f, t in scan.items() for ph in STALE if ph.lower() in t.lower()]
+        add("no stale 'transformers not executed / pending' statements in current documents", "PASS" if not stale else "FAIL", str(stale[:3]))
+    bad_agg = [f for f, t in scan.items() if "2661" in t or "2154" in t]
+    add("aggregated FN/FP totals (2661/2154) are not presented as one model", "PASS" if not bad_agg else "FAIL", str(bad_agg))
+    need_title = [f for f in ("README.md", "reports/MARS_NLP_Research_Report.md", "reports/FINAL_REPRODUCIBILITY_REPORT.md", "SUBMISSION_CHECKLIST.md")
+                  if not all(x in docs[f] for x in (TITLE, "Muhammad Rizwan", "Independent Researcher", "rizwan01107@gmail.com"))]
+    add("title, author, affiliation and email consistent in the main documents", "PASS" if not need_title else "FAIL", str(need_title))
+    wording = [w for w in ("highest observed test macro-F1", "validation-selected CPU baseline", "best-performing transformer") if w not in docs["README.md"]]
+    add("README uses the required result wording", "PASS" if not wording else "FAIL", str(wording))
+    txt = " ".join(docs[f] for f in ("README.md", "reports/MARS_NLP_Research_Report.md", "reports/FINAL_REPRODUCIBILITY_REPORT.md")).lower()
+    claim = [ph for ph in ("xlm-r was the best overall", "xlm-r is the best overall", "xlm-r significantly outperform", "xlm-r outperformed the svm") if ph in txt]
+    add("no claim that XLM-R is best overall or significantly better than the SVM", "PASS" if not claim else "FAIL", str(claim))
+    lim = {f: [x for x in REQUIRED_LIMITS if x.lower() not in docs[f].lower()] for f in ("README.md", "reports/MARS_NLP_Research_Report.md", "reports/FINAL_REPRODUCIBILITY_REPORT.md")}
+    add("required limitations present in README, research report and reproducibility report", "PASS" if not any(lim.values()) else "FAIL", str({k: v for k, v in lim.items() if v}))
+    note_docs = ["README.md", "reports/MARS_NLP_Research_Report.md", "reports/FINAL_REPRODUCIBILITY_REPORT.md", "reports/QA_REPORT.md", "SUBMISSION_CHECKLIST.md"]
+    miss_note = [f for f in note_docs if "have not been independently reproduced" not in docs[f] and "not independently reproduced" not in docs[f]]
+    add("transformer reproducibility note present (owner-verified, not independently reproduced locally)", "PASS" if not miss_note else "FAIL", str(miss_note), group="documentation")
+    p3 = ["missing raw mBERT artifacts", "missing raw XLM-R artifacts", "no-N/A verification"]
+    miss3 = [f for f in ("README.md", "reports/QA_REPORT.md", "reports/FINAL_REPRODUCIBILITY_REPORT.md", "SUBMISSION_CHECKLIST.md") if not all(k in docs[f] for k in p3)]
+    add("the 3 PENDING checks are identified (mBERT artifacts, XLM-R artifacts, no-N/A verification)", "PASS" if not miss3 else "FAIL", str(miss3), group="documentation")
+    alltxt = " ".join(docs[f] for f in note_docs if f != "reports/QA_REPORT.md").lower()   # the QA report quotes check names
+    for neg in ("not been independently reproduced locally", "not independently reproduced locally", "nor independently reproduced locally"):
+        alltxt = alltxt.replace(neg, "")           # negated statements are the intended wording, not claims
+    over = [ph for ph in ("independently reproduced locally", "fully reproducible", "complete raw-artifact reproducibility is available", "pending checks failed", "failed checks: 3")
+            if ph in alltxt]
+    add("no over-claims (locally reproduced / fully reproducible / pending = failed)", "PASS" if not over else "FAIL", str(over), group="documentation")
+    import re as _re
+
+    rep = docs["reports/MARS_NLP_Research_Report.md"]
+    body, refs = rep.split("## 24. References")
+    cited = {int(n) for grp in _re.findall(r"\[(\d+(?:, \d+)*)\]", body) for n in grp.split(", ")}
+    listed = {int(n) for n in _re.findall(r"^(\d+)\. ", refs, flags=_re.M)}
+    add("references: every listed reference is cited and every citation is listed", "PASS" if cited == listed else "FAIL", f"cited-not-listed {sorted(cited - listed)}, listed-not-cited {sorted(listed - cited)}")
+    core = [k for k in ("Devlin", "Conneau", "Pedregosa") if k not in refs]
+    add("core references present (Devlin BERT, Conneau XLM-R, Pedregosa scikit-learn)", "PASS" if not core else "FAIL", str(core))
+    unused = [k for k in ("TextFooler", "Lundberg", "Sundararajan") if k in refs]
+    add("no references to methods/models not used", "PASS" if not unused else "FAIL", str(unused))
+
+
+MS_SECTIONS = ["Abstract", "Keywords", "1. Introduction", "2. Related Work", "3. Methodology", "3.1 Dataset", "3.2 Data Splitting", "3.3 Synthetic Perturbations", "3.4 Character-Level TF-IDF",
+               "3.5 Word-Level TF-IDF", "3.6 Classical Machine-Learning Models", "3.7 mBERT", "3.8 XLM-R", "4. Experimental Setup", "5. Results", "5.1 Main Model Comparison", "5.2 Transformer Results",
+               "5.3 Statistical Comparison", "5.4 Robustness Evaluation", "5.5 Error Analysis", "6. Discussion", "7. Limitations", "8. Reproducibility", "9. Conclusion", "10. References"]
+
+
+def check_manuscript() -> None:
+    """Final manuscript vs results/*.csv, verified summary and wording rules (documentation group; not part of the core counts)."""
+    import re as _re
+
+    root = C.ROOT_DIR
+    f = root / "reports" / "MARS_NLP_Final_Manuscript.md"
+    if not f.exists():
+        add("manuscript exists", "FAIL", str(f), group="documentation")
+        return
+    t = f.read_text(encoding="utf-8")
+    low = t.lower()
+    heads = [h.strip("# ").strip() for h in _re.findall(r"^#{2,3} .+$", t, flags=_re.M)]
+    miss = [h for h in MS_SECTIONS if h not in heads]
+    add("manuscript: all required sections present", "PASS" if not miss else "FAIL", str(miss), group="documentation")
+    head_ok = all(x in t for x in (TITLE, "Muhammad Rizwan", "Independent Researcher", "rizwan01107@gmail.com"))
+    add("manuscript: title, author, affiliation, email", "PASS" if head_ok else "FAIL", group="documentation")
+    fin = pd.read_csv(root / "results/FINAL_RESULTS.csv", keep_default_na=False)
+    miss_m = []
+    for r in fin.itertuples():
+        row_txt = next((ln for ln in t.splitlines() if ln.startswith("| " + r.Model + " ")), "")
+        for k in ("Accuracy", "Precision", "Recall", "Macro_F1", "Weighted_F1"):
+            if f"{float(getattr(r, k)):.4f}" not in row_txt:
+                miss_m.append(f"{r.Model}:{k}")
+    add("manuscript: every Table-4 metric equals results/FINAL_RESULTS.csv (8 models x 5 metrics)", "PASS" if not miss_m else "FAIL", str(miss_m[:4]), group="documentation")
+    rb = pd.read_csv(root / "results/ROBUSTNESS_RESULTS.csv", keep_default_na=False)
+    rm = rb[rb.Level == "mean over 10 perturbation types"].set_index("Model")["Degradation"].astype(float)
+    miss_r = [m for m in ("Char TF-IDF + Linear SVM", "mBERT", "XLM-R") if f"{rm[m]:.4f}" not in t]
+    add("manuscript: robustness degradation values equal results/ROBUSTNESS_RESULTS.csv", "PASS" if not miss_r else "FAIL", str(miss_r), group="documentation")
+    st = pd.read_csv(root / "results/STATISTICAL_COMPARISONS.csv")
+    miss_s = [f"{v:.6f}" for r in st.itertuples() for v in (r.Difference_A_minus_B, r.CI95_low, r.CI95_high) if f"{v:.6f}" not in t and f"{abs(v):.6f}" not in t]
+    add("manuscript: statistical values equal results/STATISTICAL_COMPARISONS.csv", "PASS" if not miss_s else "FAIL", str(miss_s[:4]), group="documentation")
+    ec = pd.read_csv(root / "results/ERROR_COUNTS.csv", keep_default_na=False)
+    miss_e = []
+    for r in ec.itertuples():
+        if not _re.search(r"\|\s*[^|]*\|\s*" + _re.escape(r.Model_ID) + r"\s*\|\s*" + str(int(r.Errors)) + r"\s*\|", t):
+            miss_e.append(f"{r.Model_ID}:{r.Errors}")
+    add("manuscript: per-model error counts equal results/ERROR_COUNTS.csv (14 models)", "PASS" if not miss_e else "FAIL", str(miss_e[:4]), group="documentation")
+    sup = load_supplement()
+    ds = sup["dataset"]
+    facts = ["6,160", "52,079", "4,308", "917", "935", "778", str(ds["test_english"]), str(ds["test_roman_urdu_mixed"]), "five independent"]
+    miss_f = [x for x in facts if x not in t]
+    add("manuscript: dataset facts present (6,160 / 52,079 / 4,308 / 917 / 935 / 778 / 782 / 149 / five groups)", "PASS" if not miss_f else "FAIL", str(miss_f), group="documentation")
+    tvals = [f"{sup['transformers'][k][f]}" for k in ("mbert", "xlmr") for f in ("parameters",)] + ["681.3", "1077.0", "287.50", "295.60", "9.52", "10.25", "125.65", "117.48"]
+    miss_t = [x for x in tvals if x.replace("177854978", "177,854,978").replace("278045186", "278,045,186") not in t]
+    add("manuscript: transformer details (parameters, size, time, latency) match the verified summary", "PASS" if not miss_t else "FAIL", str(miss_t), group="documentation")
+    add("manuscript: no university name in the manuscript, README, reports or citation file", "PASS" if not [f for f in ("README.md", "reports/MARS_NLP_Research_Report.md", "reports/FINAL_REPRODUCIBILITY_REPORT.md", "SUBMISSION_CHECKLIST.md", "CITATION.cff", "reports/MARS_NLP_Final_Manuscript.md")
+                                                                                                  if ("isl" + "amia") in (root / f).read_text(encoding="utf-8").lower()] else "FAIL", group="documentation")
+    wording = [w for w in ("highest observed", "validation-selected", "best-performing transformer", "owner-verified", "not been independently reproduced locally", "synthetic perturbation suite",
+                           "not real-world adversarial robustness", "no Urdu-script benchmark", "47 PASS", "50 PASS, 0 FAIL, 3 PENDING, 0 SKIP") if w.lower() not in low]
+    add("manuscript: required wording and QA records present", "PASS" if not wording else "FAIL", str(wording), group="documentation")
+    bad = [w for w in ("state-of-the-art", "claude", "ai assistant", "cloud", "best overall model", "significantly outperform", "2661", "2154", "independently reproduced locally,", "stale")
+           if w in low.replace("not been independently reproduced locally", "").replace("transformers: state-of-the-art natural language processing", "")]
+    add("manuscript: no forbidden claims or tooling mentions (state-of-the-art, best overall, significant superiority, aggregated FN/FP)", "PASS" if not bad else "FAIL", str(bad), group="documentation")
+    body, refs = t.split("## 10. References")
+    cited = {int(n) for grp in _re.findall(r"\[(\d+(?:, \d+)*)\]", body) for n in grp.split(", ")}
+    listed = {int(n) for n in _re.findall(r"^(\d+)\. ", refs, flags=_re.M)}
+    core = all(k in refs for k in ("Devlin", "Conneau", "Pedregosa"))
+    add("manuscript: references - all listed are cited, all citations listed, core references present", "PASS" if cited == listed and core else "FAIL", f"cited-not-listed {sorted(cited - listed)}, listed-not-cited {sorted(listed - cited)}", group="documentation")
+    figs = [x for x in ("figures/model_macro_f1_comparison.png", "figures/robustness_degradation.png", "figures/mars_nlp_pipeline.png") if x not in t or not (root / "reports" / ".." / x).exists()]
+    refd = [f"Figure {i}" for i in (1, 2, 3) if f"Figure {i}" not in t]
+    add("manuscript: Figures 1-3 embedded (files exist) and referenced", "PASS" if not figs and not refd else "FAIL", str(figs + refd), group="documentation")
+    add("manuscript: PDF exists", "PASS" if (root / "reports/MARS_NLP_Final_Manuscript.pdf").exists() else "FAIL", group="documentation")
+
+
+# --------------------------------------------------------------------------- main
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--skip-pytest", action="store_true")
+    ap.add_argument("--skip-server", action="store_true")
+    a = ap.parse_args(argv)
+    RESULTS.clear()
+    check_syntax_imports()
+    if not a.skip_pytest:
+        check_pytest()
+    check_data_and_leakage()
+    check_result_files()
+    regenerate_outputs()
+    check_metric_traceability()
+    check_no_na_for_executed()
+    check_reports()
+    check_final_package()
+    check_manuscript()
+    check_streamlit_and_predictions(a.skip_server)
+    core = [r for r in RESULTS if r.get("group", "core") == "core"]
+    n = {s: sum(r["status"] == s for r in core) for s in ("PASS", "FAIL", "PENDING", "SKIP")}
+    doc_n = {s: sum(r["status"] == s for r in RESULTS if r.get("group") == "documentation") for s in ("PASS", "FAIL")}
+    ex = sorted(_executed_transformers())
+    payload = {"summary": n, "documentation_checks_summary": doc_n, "transformers_executed": ex, "checks": RESULTS, "generated": time.strftime("%Y-%m-%d %H:%M:%S")}
+    save_json(payload, T / "qa_report.json")
+    lines = ["# QA report", "", f"Generated {payload['generated']}. PASS={n['PASS']} FAIL={n['FAIL']} PENDING={n['PENDING']} SKIP={n['SKIP']}. "
+             f"Raw transformer run files present for: {ex or 'none'}.", "", "| Check | Status | Detail |", "|---|---|---|"]
+    lines += [f"| {r['check']} | {r['status']} | {str(r['detail'])[:160]} |" for r in core]
+    lines += ["", f"Documentation-wording checks (reported separately, not part of the counts above): PASS={doc_n['PASS']} FAIL={doc_n['FAIL']}", "", "| Check | Status | Detail |", "|---|---|---|"]
+    lines += [f"| {r['check']} | {r['status']} | {str(r['detail'])[:160]} |" for r in RESULTS if r.get("group") == "documentation"]
+    (T / "qa_report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    rc, out = run_cmd([sys.executable, "-m", "src.make_gpu_review"])
+    add("reports/FINAL_GPU_REVIEW.md generated", "PASS" if rc == 0 and (C.REPORTS_DIR / "FINAL_GPU_REVIEW.md").exists() else "FAIL", "" if rc == 0 else out[-200:])
+    print(f"\nQA SUMMARY (core checks): PASS={n['PASS']} FAIL={n['FAIL']} PENDING={n['PENDING']} SKIP={n['SKIP']} | documentation-wording checks: PASS={doc_n['PASS']} FAIL={doc_n['FAIL']} | raw transformer run files present for: {ex or 'NONE'}")
+    return 1 if any(r["status"] == "FAIL" for r in RESULTS) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

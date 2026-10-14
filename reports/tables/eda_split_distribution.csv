@@ -1,0 +1,4 @@
+split,Legitimate,Scam
+train,3572,736
+validation,761,156
+test,780,155

@@ -1,0 +1,11 @@
+perturbation_type,best CPU baseline (char_svm)
+spelling_variation,0.0020752417753981
+character_deletion,0.0041438620878719
+character_substitution,0.0144821606290843
+word_spacing_variation,0.0041535475864034
+punctuation_variation,0.0022204492955637
+casing_variation,0.0
+informal_abbreviation,0.0
+roman_urdu_spelling_variation,0.0
+code_switching,0.0021547161316322
+minor_noise,0.0001510627229718

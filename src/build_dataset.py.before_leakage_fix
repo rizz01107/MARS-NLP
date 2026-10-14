@@ -1,0 +1,157 @@
+"""Build the processed MARS-NLP corpus from the two raw public sources.
+
+Usage:  python -m src.build_dataset
+Outputs: data/processed/mars_nlp_processed.csv (+ .xlsx), reports/tables/build_summary.json
+"""
+from __future__ import annotations
+
+import argparse
+from collections import Counter
+
+import pandas as pd
+
+from . import config as C
+from .data_loader import load_raw_uci, load_raw_zenodo
+from .perturbations import generate_variants
+from .preprocessing import (clean_text, detect_language_with_confidence, drop_exact_duplicates, near_duplicate_groups,
+                            normalize_label)
+from .splitting import check_group_leakage, group_stratified_split, propagate_split_to_variants
+from .utils import ensure_dir, get_logger, save_json
+
+log = get_logger()
+
+
+def assemble_originals() -> tuple[pd.DataFrame, dict]:
+    uci, uci_info = load_raw_uci()
+    zen, zen_info = load_raw_zenodo()
+    info: dict = {"uci_raw_rows": len(uci), "zenodo_raw_rows": len(zen), "uci_load": uci_info, "zenodo_load": zen_info}
+
+    uci_df = pd.DataFrame({
+        "message_id": [f"UCI-{r:05d}" for r in uci["source_row"]],
+        "message": uci["message"], "label": uci["label_raw"].map(normalize_label),
+        "source_dataset": C.SRC_UCI, "source_url": C.URL_UCI, "source_license": C.LICENSE_UCI,
+        "message_type": uci["label_raw"].map(lambda x: "sms_" + x.lower()),
+    })
+    zen_df = pd.DataFrame({
+        "message_id": [f"ZEN-{r:04d}" for r in zen["source_row"]],
+        "message": zen["message"], "label": zen["label_raw"].map(normalize_label),
+        "source_dataset": C.SRC_ZENODO, "source_url": C.URL_ZENODO, "source_license": C.LICENSE_ZENODO,
+        "message_type": zen["message_type"],
+    })
+    df = pd.concat([uci_df, zen_df], ignore_index=True)
+    df["cleaned_message"] = df["message"].map(clean_text)
+    empty = int((df["cleaned_message"].str.len() == 0).sum())
+    df = df[df["cleaned_message"].str.len() > 0].copy()
+    info["empty_removed"] = empty
+
+    per_source = {}
+    kept = []
+    for name, sub in df.groupby("source_dataset", sort=False):
+        sub2, dinfo = drop_exact_duplicates(sub.reset_index(drop=True))
+        per_source[name] = dinfo
+        kept.append(sub2)
+    df = pd.concat(kept, ignore_index=True)
+    # cross-source exact duplicates
+    cross = df.duplicated("cleaned_message", keep="first")
+    info["cross_source_exact_duplicates_removed"] = int(cross.sum())
+    df = df[~cross].reset_index(drop=True)
+    info["exact_dedup_per_source"] = per_source
+    return df, info
+
+
+def add_language(df: pd.DataFrame) -> pd.DataFrame:
+    out = df.copy()
+    res = out["cleaned_message"].map(detect_language_with_confidence)
+    out["language"] = [r[0] for r in res]
+    out["language_confidence"] = [r[1] for r in res]
+    out["is_code_switched"] = out["language"] == C.LANG_MIXED
+    return out
+
+
+def finalise_originals(df: pd.DataFrame, threshold: float, seed: int) -> pd.DataFrame:
+    out = add_language(df)
+    cluster = near_duplicate_groups(out["cleaned_message"].tolist(), threshold=threshold)
+    out["group_id"] = [f"G{c:05d}" for c in cluster]
+    out["source_type"] = C.SOURCE_REAL
+    out["is_perturbed"] = False
+    out["perturbation_type"] = C.NO_PERTURBATION
+    out["original_message_id"] = pd.NA
+    out["split"] = group_stratified_split(out, "group_id", C.SPLIT_FRACTIONS, seed)
+    return out
+
+
+def make_perturbed_rows(originals: pd.DataFrame, seed: int) -> pd.DataFrame:
+    rows = []
+    for rec in originals.itertuples(index=False):
+        for ptype, new_text in generate_variants(rec.message, rec.language, rec.message_id, seed):
+            lang = C.LANG_MIXED if ptype == "code_switching" else rec.language
+            rows.append({
+                "message_id": f"{rec.message_id}__{ptype}", "message": new_text, "cleaned_message": clean_text(new_text),
+                "language": lang, "language_confidence": rec.language_confidence if ptype != "code_switching" else "high",
+                "label": rec.label, "source_dataset": rec.source_dataset, "source_url": rec.source_url,
+                "source_license": rec.source_license, "source_type": C.SOURCE_AUGMENTED,
+                "message_type": rec.message_type, "is_code_switched": lang == C.LANG_MIXED, "is_perturbed": True,
+                "perturbation_type": ptype, "original_message_id": rec.message_id, "split": rec.split,
+                "group_id": rec.group_id,
+            })
+    return pd.DataFrame(rows)
+
+
+def build(threshold: float = C.NEAR_DUP_THRESHOLD, seed: int = C.SEED, write_xlsx: bool = True) -> pd.DataFrame:
+    log.info("Assembling originals from raw sources ...")
+    df, info = assemble_originals()
+    log.info("Originals after exact dedup: %d", len(df))
+    originals = finalise_originals(df, threshold, seed)
+    log.info("Near-duplicate groups: %d", originals["group_id"].nunique())
+    perturbed = make_perturbed_rows(originals, seed)
+    log.info("Perturbed variants: %d", len(perturbed))
+    full = pd.concat([originals, perturbed], ignore_index=True)
+    full["split"] = propagate_split_to_variants(full)
+    leak = check_group_leakage(full)
+    if leak["groups_in_multiple_splits"] or leak["variants_with_split_different_from_original"]:
+        raise RuntimeError(f"Leakage detected after splitting: {leak}")
+    full = full[C.README_COLUMNS + C.EXTRA_COLUMNS]
+    ensure_dir(C.PROCESSED_DIR)
+    full.to_csv(C.PROCESSED_CSV, index=False, encoding="utf-8-sig")
+    log.info("Wrote %s (%d rows)", C.PROCESSED_CSV, len(full))
+    if write_xlsx:
+        _write_xlsx(full)
+    info.update({
+        "n_originals": len(originals), "n_perturbed": len(perturbed), "n_total": len(full),
+        "n_groups": int(originals["group_id"].nunique()), "near_dup_threshold": threshold, "seed": seed,
+        "split_counts_originals": originals["split"].value_counts().to_dict(),
+        "language_counts_originals": originals["language"].value_counts().to_dict(),
+        "perturbation_counts": dict(Counter(perturbed["perturbation_type"])), "leakage_check": leak,
+    })
+    save_json(info, C.TABLES_DIR / "build_summary.json")
+    return full
+
+
+def _write_xlsx(full: pd.DataFrame) -> None:
+    from openpyxl import Workbook
+
+    wb = Workbook(write_only=True)
+    ws = wb.create_sheet("MARS_NLP_DATASET")
+    ws.append(list(full.columns))
+    for row in full.itertuples(index=False):
+        ws.append([None if (isinstance(v, float) and pd.isna(v)) or v is pd.NA else
+                   (bool(v) if isinstance(v, (bool,)) else v) for v in row])
+    reg = wb.create_sheet("SOURCE_REGISTRY")
+    reg.append(["dataset_name", "source_url", "license", "language", "note"])
+    reg.append([C.SRC_UCI, C.URL_UCI, C.LICENSE_UCI, "English", "Original 5,574 rows; exact duplicates removed in build"])
+    reg.append([C.SRC_ZENODO, C.URL_ZENODO, C.LICENSE_ZENODO, "Roman Urdu / English", "1,000 rows; templated messages"])
+    wb.save(C.PROCESSED_XLSX)
+    log.info("Wrote %s", C.PROCESSED_XLSX)
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--threshold", type=float, default=C.NEAR_DUP_THRESHOLD)
+    ap.add_argument("--seed", type=int, default=C.SEED)
+    ap.add_argument("--no-xlsx", action="store_true")
+    a = ap.parse_args()
+    build(a.threshold, a.seed, write_xlsx=not a.no_xlsx)
+
+
+if __name__ == "__main__":
+    main()

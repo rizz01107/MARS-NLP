@@ -1,0 +1,218 @@
+{
+  "provenance": "Owner-supplied verified summary of the Google Colab (NVIDIA Tesla T4) transformer run and of the Colab QA run. The raw run files (experiments/results/transformer_<tag>.json, transformer_predictions_<tag>.csv, transformer_robustness_<tag>.csv, models/transformers/<tag>/) were NOT present in the sandbox where the final cleanup was performed, so these values could not be recomputed there. If those raw files are copied into experiments/results/, the code prefers them over this file and `python -m src.qa_check` recomputes and checks every value.",
+  "values_source_of_truth": true,
+  "dataset": {
+    "originals": 6160,
+    "perturbed_variants": 52079,
+    "train_originals": 4308,
+    "validation_originals": 917,
+    "test_originals": 935,
+    "test_groups": 778,
+    "test_english": 782,
+    "test_roman_urdu_mixed": 149,
+    "roman_urdu_mixed_independent_test_groups": 5
+  },
+  "transformers": {
+    "mbert": {
+      "name": "mBERT (bert-base-multilingual-cased)",
+      "hf_model_id": "bert-base-multilingual-cased",
+      "train_samples": 4308,
+      "gpu": "NVIDIA Tesla T4",
+      "best_epoch": 2,
+      "train_seconds": 287.5,
+      "gpu_latency_ms_per_message": 9.52,
+      "cpu_latency_ms_per_message": 125.65,
+      "parameters": 177854978,
+      "model_size_mb": 681.3,
+      "accuracy": 0.9369,
+      "precision": 0.875,
+      "recall": 0.7226,
+      "macro_f1": 0.8772,
+      "weighted_f1": 0.9344,
+      "macro_f1_ci95": [
+        0.754,
+        0.97
+      ],
+      "robustness_degradation": -0.0055,
+      "error_count_test_orig_plus_variants": 614
+    },
+    "xlmr": {
+      "name": "XLM-RoBERTa (xlm-roberta-base)",
+      "hf_model_id": "xlm-roberta-base",
+      "train_samples": 4308,
+      "gpu": "NVIDIA Tesla T4",
+      "best_epoch": 4,
+      "train_seconds": 295.6,
+      "gpu_latency_ms_per_message": 10.25,
+      "cpu_latency_ms_per_message": 117.48,
+      "parameters": 278045186,
+      "model_size_mb": 1077.0,
+      "accuracy": 0.985,
+      "precision": 0.9862,
+      "recall": 0.9226,
+      "macro_f1": 0.9722,
+      "weighted_f1": 0.9848,
+      "macro_f1_ci95": [
+        0.946,
+        0.987
+      ],
+      "robustness_degradation": 0.0339,
+      "error_count_test_orig_plus_variants": 264
+    }
+  },
+  "training_protocol": {
+    "max_epochs": 4,
+    "early_stopping": "validation macro-F1",
+    "patience": 2,
+    "batch_size": 32,
+    "oom_fallback": "batch size 16 (must be recorded explicitly)",
+    "defaults_of_the_documented_command": {
+      "learning_rate": 2e-05,
+      "max_length": 128,
+      "weight_decay": 0.01,
+      "warmup_ratio": 0.1,
+      "seed": 42,
+      "loss": "class-weighted cross-entropy",
+      "optimizer": "AdamW, linear warm-up/decay"
+    }
+  },
+  "statistical_comparisons": [
+    {
+      "comparison": "XLM-R vs selected Char TF-IDF + Linear SVM (overall test, macro-F1)",
+      "metric": "macro_f1_difference_A_minus_B",
+      "A": "XLM-R",
+      "B": "Char TF-IDF + Linear SVM",
+      "difference": -0.001915,
+      "ci95_low": -0.018834,
+      "ci95_high": 0.013255,
+      "ci_includes_zero": true,
+      "interpretation": "No evidence of a difference; do not claim XLM-R superiority over the selected SVM."
+    },
+    {
+      "comparison": "XLM-R vs mBERT (overall test, macro-F1)",
+      "metric": "macro_f1_difference_A_minus_B",
+      "A": "XLM-R",
+      "B": "mBERT",
+      "difference": 0.095037,
+      "ci95_low": 0.001722,
+      "ci95_high": 0.223619,
+      "ci_includes_zero": false,
+      "interpretation": "Interval excludes zero (lower bound barely above zero); XLM-R > mBERT on this test split."
+    },
+    {
+      "comparison": "XLM-R vs mBERT (English-only test, macro-F1)",
+      "metric": "macro_f1_difference_A_minus_B",
+      "A": "XLM-R",
+      "B": "mBERT",
+      "difference": 0.008583,
+      "ci95_low": -0.006933,
+      "ci95_high": 0.025362,
+      "ci_includes_zero": true,
+      "interpretation": "No evidence of an English-only difference."
+    }
+  ],
+  "error_counts_test_originals_plus_variants": {
+    "char_lr": 141,
+    "char_lr_aug": 159,
+    "char_nb": 533,
+    "char_nb_aug": 423,
+    "char_svm": 142,
+    "char_svm_aug": 146,
+    "word_lr": 291,
+    "word_lr_aug": 505,
+    "word_nb": 550,
+    "word_nb_aug": 359,
+    "word_svm": 177,
+    "word_svm_aug": 511,
+    "mbert": 614,
+    "xlmr": 264
+  },
+  "qa_owner_verified": {
+    "PASS": 47,
+    "FAIL": 0,
+    "PENDING": 0,
+    "SKIP": 0,
+    "pytest_passed": 63,
+    "checks": [
+      "no group overlap across splits",
+      "variants remain in their original split",
+      "zero exact cross-split text overlap",
+      "processed CSV checksum verified",
+      "split fingerprints unchanged",
+      "mBERT trained/evaluated",
+      "XLM-R trained/evaluated",
+      "both transformers ran on Tesla T4",
+      "metrics recomputed from raw predictions (70 metric values checked)",
+      "robustness metrics traced",
+      "prediction smoke tests passed",
+      "Streamlit AppTest passed",
+      "headless application startup passed"
+    ]
+  },
+  "owner_final_table": [
+    {
+      "Model": "Char TF-IDF + Logistic Regression",
+      "Accuracy": 0.9872,
+      "Precision": 0.9931,
+      "Recall": 0.929,
+      "Macro_F1": 0.9762,
+      "Weighted_F1": 0.987
+    },
+    {
+      "Model": "Char TF-IDF + Linear SVM",
+      "Accuracy": 0.9861,
+      "Precision": 0.9931,
+      "Recall": 0.9226,
+      "Macro_F1": 0.9741,
+      "Weighted_F1": 0.9859
+    },
+    {
+      "Model": "Word TF-IDF + Logistic Regression",
+      "Accuracy": 0.969,
+      "Precision": 0.8938,
+      "Recall": 0.9226,
+      "Macro_F1": 0.9446,
+      "Weighted_F1": 0.9692
+    },
+    {
+      "Model": "Word TF-IDF + Linear SVM",
+      "Accuracy": 0.9861,
+      "Precision": 0.9931,
+      "Recall": 0.9226,
+      "Macro_F1": 0.9741,
+      "Weighted_F1": 0.9859
+    },
+    {
+      "Model": "Word TF-IDF + Naive Bayes",
+      "Accuracy": 0.9369,
+      "Precision": 0.7927,
+      "Recall": 0.8387,
+      "Macro_F1": 0.8885,
+      "Weighted_F1": 0.9376
+    },
+    {
+      "Model": "Char TF-IDF + Naive Bayes",
+      "Accuracy": 0.9283,
+      "Precision": 0.75,
+      "Recall": 0.8516,
+      "Macro_F1": 0.877,
+      "Weighted_F1": 0.9301
+    },
+    {
+      "Model": "mBERT",
+      "Accuracy": 0.9369,
+      "Precision": 0.875,
+      "Recall": 0.7226,
+      "Macro_F1": 0.8772,
+      "Weighted_F1": 0.9344
+    },
+    {
+      "Model": "XLM-R",
+      "Accuracy": 0.985,
+      "Precision": 0.9862,
+      "Recall": 0.9226,
+      "Macro_F1": 0.9722,
+      "Weighted_F1": 0.9848
+    }
+  ]
+}

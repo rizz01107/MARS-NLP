@@ -1,0 +1,31 @@
+model_id,direction,feature,weight
+char_lr,Scam, 0,8.572663524590471
+char_lr,Scam,00,6.399232033790242
+char_lr,Scam,08,6.312367305030777
+char_lr,Scam, 1,6.132034695787628
+char_lr,Scam,50,5.518120461442044
+char_lr,Scam, 8,5.19722201342099
+char_lr,Scam,09,5.046369096896098
+char_lr,Scam,0 ,4.896508257705287
+char_lr,Scam,80,4.732294421126954
+char_lr,Scam,0p,4.662374779626923
+char_lr,Scam,87,4.616283777159339
+char_lr,Scam, £,4.533738799708454
+char_lr,Scam,xt,4.498608172109877
+char_lr,Scam,15,4.484844702775028
+char_lr,Scam, 08,4.481539910941347
+char_lr,Legitimate, i ,-5.369689790486387
+char_lr,Legitimate,i ,-4.807864881952073
+char_lr,Legitimate, i,-4.213203773257125
+char_lr,Legitimate,..,-3.814943790498184
+char_lr,Legitimate, m,-2.9760897332823246
+char_lr,Legitimate, me,-2.8486325379585877
+char_lr,Legitimate,my ,-2.820288368806668
+char_lr,Legitimate, my,-2.765238052054101
+char_lr,Legitimate, my ,-2.7410839177612605
+char_lr,Legitimate, me ,-2.700036928089937
+char_lr,Legitimate, go,-2.6232724057488745
+char_lr,Legitimate,me ,-2.511254514936351
+char_lr,Legitimate,.. ,-2.422377038323155
+char_lr,Legitimate,my,-2.3959028465922305
+char_lr,Legitimate,go,-2.3731044695099217

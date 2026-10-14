@@ -1,0 +1,69 @@
+Model,Level,Perturbation_Type,Degradation,CI95_low,CI95_high,n_pairs,n_groups,Source
+Char TF-IDF + Logistic Regression,mean over 10 perturbation types,ALL (mean),0.0064,,,,,experiments/results/robustness_results.csv (mean of per-type values)
+Char TF-IDF + Linear SVM,mean over 10 perturbation types,ALL (mean),0.0029,,,,,experiments/results/robustness_results.csv (mean of per-type values)
+Word TF-IDF + Logistic Regression,mean over 10 perturbation types,ALL (mean),-0.0043,,,,,experiments/results/robustness_results.csv (mean of per-type values)
+Word TF-IDF + Linear SVM,mean over 10 perturbation types,ALL (mean),0.0126,,,,,experiments/results/robustness_results.csv (mean of per-type values)
+Word TF-IDF + Naive Bayes,mean over 10 perturbation types,ALL (mean),-0.0141,,,,,experiments/results/robustness_results.csv (mean of per-type values)
+Char TF-IDF + Naive Bayes,mean over 10 perturbation types,ALL (mean),-0.0356,,,,,experiments/results/robustness_results.csv (mean of per-type values)
+mBERT,mean over 10 perturbation types,ALL (mean),-0.0055,,,,,results/verified_transformer_results.json (owner-verified Colab T4 run (raw files not in this snapshot))
+XLM-R,mean over 10 perturbation types,ALL (mean),0.0339,,,,,results/verified_transformer_results.json (owner-verified Colab T4 run (raw files not in this snapshot))
+Char TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",spelling_variation,0.0041,-0.0036,0.0131,913,757,experiments/results/robustness_results.csv
+Char TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",character_deletion,0.006,-0.0068,0.0189,935,778,experiments/results/robustness_results.csv
+Char TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",character_substitution,0.0144,-0.0018,0.0313,935,778,experiments/results/robustness_results.csv
+Char TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",word_spacing_variation,0.0062,0.0,0.0162,923,767,experiments/results/robustness_results.csv
+Char TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",punctuation_variation,0.0083,-0.0011,0.0211,932,775,experiments/results/robustness_results.csv
+Char TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",casing_variation,0.0,0.0,0.0,935,778,experiments/results/robustness_results.csv
+Char TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",informal_abbreviation,0.0025,0.0,0.0087,632,527,experiments/results/robustness_results.csv
+Char TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",roman_urdu_spelling_variation,0.0225,0.0,0.3172,137,5,experiments/results/robustness_results.csv
+Char TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",code_switching,0.0,-0.0075,0.0079,700,568,experiments/results/robustness_results.csv
+Char TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",minor_noise,0.0001,-0.0069,0.0075,901,744,experiments/results/robustness_results.csv
+Char TF-IDF + Linear SVM,"per perturbation type (paired, test split)",spelling_variation,0.0021,0.0,0.0079,913,757,experiments/results/robustness_results.csv
+Char TF-IDF + Linear SVM,"per perturbation type (paired, test split)",character_deletion,0.0041,-0.0079,0.0143,935,778,experiments/results/robustness_results.csv
+Char TF-IDF + Linear SVM,"per perturbation type (paired, test split)",character_substitution,0.0145,0.0053,0.0298,935,778,experiments/results/robustness_results.csv
+Char TF-IDF + Linear SVM,"per perturbation type (paired, test split)",word_spacing_variation,0.0042,0.0,0.0125,923,767,experiments/results/robustness_results.csv
+Char TF-IDF + Linear SVM,"per perturbation type (paired, test split)",punctuation_variation,0.0022,-0.007,0.0126,932,775,experiments/results/robustness_results.csv
+Char TF-IDF + Linear SVM,"per perturbation type (paired, test split)",casing_variation,0.0,0.0,0.0,935,778,experiments/results/robustness_results.csv
+Char TF-IDF + Linear SVM,"per perturbation type (paired, test split)",informal_abbreviation,0.0,-0.008,0.0079,632,527,experiments/results/robustness_results.csv
+Char TF-IDF + Linear SVM,"per perturbation type (paired, test split)",roman_urdu_spelling_variation,0.0,0.0,0.0,137,5,experiments/results/robustness_results.csv
+Char TF-IDF + Linear SVM,"per perturbation type (paired, test split)",code_switching,0.0022,-0.006,0.0121,700,568,experiments/results/robustness_results.csv
+Char TF-IDF + Linear SVM,"per perturbation type (paired, test split)",minor_noise,0.0002,-0.0061,0.0074,901,744,experiments/results/robustness_results.csv
+Word TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",spelling_variation,0.0056,0.0,0.0146,913,757,experiments/results/robustness_results.csv
+Word TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",character_deletion,0.0097,0.0,0.0215,935,778,experiments/results/robustness_results.csv
+Word TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",character_substitution,0.0125,0.0017,0.0258,935,778,experiments/results/robustness_results.csv
+Word TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",word_spacing_variation,0.0009,-0.0275,0.0235,923,767,experiments/results/robustness_results.csv
+Word TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",punctuation_variation,0.0,0.0,0.0,932,775,experiments/results/robustness_results.csv
+Word TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",casing_variation,0.0,0.0,0.0,935,778,experiments/results/robustness_results.csv
+Word TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",informal_abbreviation,-0.0001,-0.0082,0.0068,632,527,experiments/results/robustness_results.csv
+Word TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",roman_urdu_spelling_variation,-0.0717,-0.2551,0.3866,137,5,experiments/results/robustness_results.csv
+Word TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",code_switching,0.0023,-0.0038,0.0137,700,568,experiments/results/robustness_results.csv
+Word TF-IDF + Logistic Regression,"per perturbation type (paired, test split)",minor_noise,-0.0018,-0.0156,0.0093,901,744,experiments/results/robustness_results.csv
+Word TF-IDF + Linear SVM,"per perturbation type (paired, test split)",spelling_variation,0.0172,0.0041,0.0437,913,757,experiments/results/robustness_results.csv
+Word TF-IDF + Linear SVM,"per perturbation type (paired, test split)",character_deletion,0.0159,0.0,0.04,935,778,experiments/results/robustness_results.csv
+Word TF-IDF + Linear SVM,"per perturbation type (paired, test split)",character_substitution,0.0202,0.006,0.0399,935,778,experiments/results/robustness_results.csv
+Word TF-IDF + Linear SVM,"per perturbation type (paired, test split)",word_spacing_variation,0.0255,0.0127,0.0475,923,767,experiments/results/robustness_results.csv
+Word TF-IDF + Linear SVM,"per perturbation type (paired, test split)",punctuation_variation,0.0,0.0,0.0,932,775,experiments/results/robustness_results.csv
+Word TF-IDF + Linear SVM,"per perturbation type (paired, test split)",casing_variation,0.0,0.0,0.0,935,778,experiments/results/robustness_results.csv
+Word TF-IDF + Linear SVM,"per perturbation type (paired, test split)",informal_abbreviation,-0.0002,-0.008,0.0072,632,527,experiments/results/robustness_results.csv
+Word TF-IDF + Linear SVM,"per perturbation type (paired, test split)",roman_urdu_spelling_variation,0.0377,0.0,0.3866,137,5,experiments/results/robustness_results.csv
+Word TF-IDF + Linear SVM,"per perturbation type (paired, test split)",code_switching,0.0,0.0,0.0,700,568,experiments/results/robustness_results.csv
+Word TF-IDF + Linear SVM,"per perturbation type (paired, test split)",minor_noise,0.0098,0.0018,0.0257,901,744,experiments/results/robustness_results.csv
+Word TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",spelling_variation,0.0056,-0.0035,0.0211,913,757,experiments/results/robustness_results.csv
+Word TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",character_deletion,0.0096,-0.0129,0.0466,935,778,experiments/results/robustness_results.csv
+Word TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",character_substitution,0.0126,-0.0004,0.0347,935,778,experiments/results/robustness_results.csv
+Word TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",word_spacing_variation,-0.0158,-0.0748,0.0334,923,767,experiments/results/robustness_results.csv
+Word TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",punctuation_variation,0.0,0.0,0.0,932,775,experiments/results/robustness_results.csv
+Word TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",casing_variation,0.0,0.0,0.0,935,778,experiments/results/robustness_results.csv
+Word TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",informal_abbreviation,0.0023,-0.0102,0.0161,632,527,experiments/results/robustness_results.csv
+Word TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",roman_urdu_spelling_variation,-0.1266,-0.2579,0.0,137,5,experiments/results/robustness_results.csv
+Word TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",code_switching,-0.0285,-0.0763,0.0083,700,568,experiments/results/robustness_results.csv
+Word TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",minor_noise,-0.0006,-0.0101,0.0109,901,744,experiments/results/robustness_results.csv
+Char TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",spelling_variation,-0.0186,-0.0386,-0.0019,913,757,experiments/results/robustness_results.csv
+Char TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",character_deletion,-0.011,-0.0335,0.0124,935,778,experiments/results/robustness_results.csv
+Char TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",character_substitution,-0.0147,-0.0452,0.0176,935,778,experiments/results/robustness_results.csv
+Char TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",word_spacing_variation,-0.0198,-0.0515,0.0088,923,767,experiments/results/robustness_results.csv
+Char TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",punctuation_variation,-0.0462,-0.1193,0.0059,932,775,experiments/results/robustness_results.csv
+Char TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",casing_variation,0.0,0.0,0.0,935,778,experiments/results/robustness_results.csv
+Char TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",informal_abbreviation,0.0,0.0,0.0,632,527,experiments/results/robustness_results.csv
+Char TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",roman_urdu_spelling_variation,-0.1768,-0.3797,0.0,137,5,experiments/results/robustness_results.csv
+Char TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",code_switching,-0.0523,-0.1537,0.025,700,568,experiments/results/robustness_results.csv
+Char TF-IDF + Naive Bayes,"per perturbation type (paired, test split)",minor_noise,-0.0162,-0.038,0.0042,901,744,experiments/results/robustness_results.csv

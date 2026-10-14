@@ -1,0 +1,9 @@
+Model,Family,Accuracy,Precision,Recall,Macro_F1,Weighted_F1,Macro_F1_CI95,Role,Hardware,Source
+Char TF-IDF + Logistic Regression,CPU baseline (TF-IDF),0.9872,0.9931,0.929,0.9762,0.987,"[0.952, 0.990]",highest observed test macro-F1 among the 8 models,CPU (1 core),experiments/results/baseline_results.csv (recomputed from baseline_predictions.csv by QA)
+Char TF-IDF + Linear SVM,CPU baseline (TF-IDF),0.9861,0.9931,0.9226,0.9741,0.9859,"[0.949, 0.988]",validation-selected CPU baseline,CPU (1 core),experiments/results/baseline_results.csv (recomputed from baseline_predictions.csv by QA)
+Word TF-IDF + Logistic Regression,CPU baseline (TF-IDF),0.969,0.8938,0.9226,0.9446,0.9692,"[0.857, 0.987]",,CPU (1 core),experiments/results/baseline_results.csv (recomputed from baseline_predictions.csv by QA)
+Word TF-IDF + Linear SVM,CPU baseline (TF-IDF),0.9861,0.9931,0.9226,0.9741,0.9859,"[0.948, 0.989]",,CPU (1 core),experiments/results/baseline_results.csv (recomputed from baseline_predictions.csv by QA)
+Word TF-IDF + Naive Bayes,CPU baseline (TF-IDF),0.9369,0.7927,0.8387,0.8885,0.9376,"[0.750, 0.967]",,CPU (1 core),experiments/results/baseline_results.csv (recomputed from baseline_predictions.csv by QA)
+Char TF-IDF + Naive Bayes,CPU baseline (TF-IDF),0.9283,0.75,0.8516,0.877,0.9301,"[0.718, 0.967]",,CPU (1 core),experiments/results/baseline_results.csv (recomputed from baseline_predictions.csv by QA)
+mBERT,Transformer,0.9369,0.875,0.7226,0.8772,0.9344,"[0.754, 0.970]",,NVIDIA Tesla T4,results/verified_transformer_results.json (owner-verified Colab T4 run (raw files not in this snapshot))
+XLM-R,Transformer,0.985,0.9862,0.9226,0.9722,0.9848,"[0.946, 0.987]",best-performing transformer,NVIDIA Tesla T4,results/verified_transformer_results.json (owner-verified Colab T4 run (raw files not in this snapshot))
